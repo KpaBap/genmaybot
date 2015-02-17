@@ -106,9 +106,9 @@ def getRule(self, e):
             rule_num = int(e.input)
         except ValueError:
             rule_num = 0
-        
+
         ## Valid Rule
-        if (rule_num > 0 and rule_num < len(rules)):
+        if (rule_num > 0 and rule_num <= len(rules)):
             e.output = "Rule %d: %s" % (rule_num, rules[rule_num])
 
         ## Invalid Rule
