@@ -64,6 +64,9 @@ class TestBot(SingleServerIRCBot):
         self.botadmins = config["irc"]["botadmins"].split(",")
         self.error_log = simpleLogger(config['misc']['error_log'])
         self.event_log = simpleLogger(config['misc']['event_log'])
+        
+        if self.botconfig['irc']['keepalive_timeout'] == "":
+            self.botconfig['irc']['keepalive_timeout'] = 120
 
         sys.stdout = self.event_log
         sys.stderr = self.error_log
@@ -112,7 +115,7 @@ class TestBot(SingleServerIRCBot):
             self.alive = True
 
     def keepalive(self, irc_context):
-        if time.time() - self.last_keepalive > 90:
+        if time.time() - self.last_keepalive > self.botconfig['irc']['keepalive_timeout']:
             if not self.alive:
                 print("%s: I think we are dead, reconnecting." %
                       time.strftime("%m/%d/%y %H:%M:%S", time.localtime()))
