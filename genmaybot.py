@@ -115,7 +115,7 @@ class TestBot(SingleServerIRCBot):
             self.alive = True
 
     def keepalive(self, irc_context):
-        if time.time() - self.last_keepalive > self.botconfig['irc']['keepalive_timeout']:
+        if time.time() - self.last_keepalive > int(self.botconfig['irc']['keepalive_timeout']):
             if not self.alive:
                 print("%s: I think we are dead, reconnecting." %
                       time.strftime("%m/%d/%y %H:%M:%S", time.localtime()))
