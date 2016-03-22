@@ -566,7 +566,7 @@ def strava_ride_to_string(recent_ride, athlete_id=None): #if the athlete ID is m
         max_mph = strava_convert_meters_per_second_to_miles_per_hour(recent_ride['max_speed'])
         feet_climbed = strava_convert_meters_to_feet(recent_ride['total_elevation_gain'])
         # Output string
-        return_string = "%s near %s, %s on %s (http://www.strava.com/activities/%s)\n" % (recent_ride['name'], recent_ride['location_city'], recent_ride['location_state'], time_start, recent_ride['id'])
+        return_string = "%s on %s (http://www.strava.com/activities/%s)\n" % (recent_ride['name'], time_start, recent_ride['id'])
         return_string += "Ride Stats: %s mi in %s | %s mph average / %s mph max | %s feet climbed" % (miles, moving_time, mph, max_mph, int(feet_climbed))
         
     elif measurement_pref == "meters":
@@ -575,7 +575,7 @@ def strava_ride_to_string(recent_ride, athlete_id=None): #if the athlete ID is m
         max_kmh = round(float(recent_ride['max_speed']) * 3.6,1) #m/s to km/h
         m_climbed = recent_ride['total_elevation_gain']
     
-        return_string = "%s near %s, %s on %s (http://www.strava.com/activities/%s)\n" % (recent_ride['name'], recent_ride['location_city'], recent_ride['location_state'], time_start, recent_ride['id'])
+        return_string = "%s on %s (http://www.strava.com/activities/%s)\n" % (recent_ride['name'], time_start, recent_ride['id'])
         return_string += "Ride Stats: %s km in %s | %s km/h average / %s km/h max | %s meters climbed" % (km, moving_time, kmh, max_kmh, int(m_climbed))
         
 
