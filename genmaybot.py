@@ -178,8 +178,8 @@ class TestBot(SingleServerIRCBot):
 
         if command in self.admincommands and self.isbotadmin(from_nick):
             self.admincommand = line
-            c.who(from_nick)
-
+            c.whois(from_nick)
+		
         # Mirror the PM to the list of admin nicks
         self.mirror_pm(c, from_nick, line, "PM")
 
@@ -196,6 +196,22 @@ class TestBot(SingleServerIRCBot):
         except:
             return
 
+    def on_whoisregnick(self, c, e):
+        nick = e.arguments()[0]
+        line = self.admincommand
+        command = line.split(" ")[0]
+        self.admincommand = ""
+        try:
+            if e.arguments()[1].find("registered") != -1 and line != "":
+                say = self.admincommands[command](line, nick, self, c)
+                say = say.split("\n")
+                for line in say:
+                    c.privmsg(nick, line)
+
+        except Exception as inst:
+            traceback.print_exc()
+            print("admin exception: " + line + " : " + str(inst))
+
     def on_whoreply(self, c, e):
         nick = e.arguments()[4]
 
@@ -209,19 +225,6 @@ class TestBot(SingleServerIRCBot):
             #:<nick>!<realname>@<hostname> PRIVMSG <target> :
             return
 
-        line = self.admincommand
-        command = line.split(" ")[0]
-        self.admincommand = ""
-        try:
-            if e.arguments()[5].find("r") != -1 and line != "":
-                say = self.admincommands[command](line, nick, self, c)
-                say = say.split("\n")
-                for line in say:
-                    c.privmsg(nick, line)
-
-        except Exception as inst:
-            traceback.print_exc()
-            print("admin exception: " + line + " : " + str(inst))
 
     def process_line(self, c, ircevent, private=False):
         if self.doingcommand:
