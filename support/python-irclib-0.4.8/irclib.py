@@ -692,14 +692,14 @@ class ServerConnection(Connection):
         """Send an INVITE command."""
         self.send_raw(" ".join(["INVITE", nick, channel]).strip())
 
-    def ison(self, nicks):
+    def ison(self, nick):
         """Send an ISON command.
 
         Arguments:
 
-            nicks -- List of nicks.
+            nick -- Nick to check ISON status on
         """
-        self.send_raw("ISON " + " ".join(nicks))
+        self.send_raw("ISON " + nick)
 
     def join(self, channel, key=""):
         """Send a JOIN command."""
