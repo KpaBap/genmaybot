@@ -16,11 +16,11 @@ class StemCalc:
     parameter_meta_data = {
         'first_stem': {
             'name': 'First Stem',
-            'examples': ['100/-6/20', '110/6/10', '100/-17/0/42', 'length/angle/stack[/stem height = 40]']
+            'examples': ['100/-6/20', '110/6/10', '100/-17/0/42']
         },
         'second_stem': {
             'name': 'Second Stem',
-            'examples': ['100/-6/20', '110/6/10', '100/-17/0/42', 'length/angle/stack[/stem height = 40]']
+            'examples': ['length/angle/stack[/stem height = 40]']
         },
         'headtube': {
             'name': 'Head Tube',
