@@ -15,12 +15,12 @@ class StemCalc:
 
     parameter_meta_data = {
         'first_stem': {
-            'name': 'First Stem (length/angle/spacer stack/stem height)',
-            'examples': ['100/-6/20', '90/6/0', '110/+6/10', '100/-6/0/42']
+            'name': 'First Stem',
+            'examples': ['100/-6/20', '110/6/10', '100/-17/0/42', 'length/angle/stack[/stem height = 40]']
         },
         'second_stem': {
-            'name': 'Second Stem (length/angle/spacer stack/stem height)',
-            'examples': ['100/-6/20', '90/6/0', '110/+6/10', '100/-6/0/42']
+            'name': 'Second Stem',
+            'examples': ['100/-6/20', '110/6/10', '100/-17/0/42', 'length/angle/stack[/stem height = 40]']
         },
         'headtube': {
             'name': 'Head Tube',
@@ -54,17 +54,22 @@ class StemCalc:
 
     def solve(self):
         if self.first_stem and self.second_stem:
-            text = 'Reach Change: '
             reach_change = self.compare_reach(self.first_stem, self.second_stem)
+            text = ''
             if reach_change > 0:
-                text += '+'
-            text += str(reach_change) + 'mm'
-            text += ' '
-            text += 'Stack Change: '
+                text += str(abs(reach_change)) + 'mm more reach'
+            elif reach_change < 0:
+                text += str(abs(reach_change)) + 'mm less reach'
+            else:
+                text += 'No change in reach'
+            text += ' and '
             stack_change = self.compare_stack(self.first_stem, self.second_stem)
-            if reach_change > 0:
-                text += '+'
-            text += str(stack_change) + 'mm'
+            if stack_change > 0:
+                text += str(abs(stack_change)) + 'mm more stack'
+            elif stack_change < 0:
+                text += str(abs(stack_change)) + 'mm less stack'
+            else:
+                text += 'no change in stack'
             return text
         else:
             text = "I need more information try some of the following: "
