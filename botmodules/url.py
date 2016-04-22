@@ -154,8 +154,8 @@ def get_title(self, e, url):
         return title
 
 
-def last_link(self, e):
-    #displays last link posted (requires mysql)
+def last_title(self, e):
+    #displays the title of the last link posted (requires sql)
     conn = sqlite3.connect("links.sqlite")
     cursor = conn.cursor()
     if (cursor.execute("SELECT url FROM links ORDER BY rowid DESC LIMIT 1")):
@@ -166,6 +166,21 @@ def last_link(self, e):
     
     return url_posted(self, e, True)
 
-last_link.command = "!title"
-last_link.helptext = "Usage: !title\nShows the title of the last URL that was posted in the channel"
+last_title.command = "!title"
+last_title.helptext = "Usage: !title\nShows the title of the last URL that was posted in the channel"
+
+
+    
+def last_link(self, e):
+    #displays the title of the last link posted (requires sql)
+    conn = sqlite3.connect("links.sqlite")
+    cursor = conn.cursor()
+    if (cursor.execute("SELECT url FROM links ORDER BY rowid DESC LIMIT 1")):
+        result = cursor.fetchone()
+        url = result[0]
+    conn.close()    
+    return url
+
+last_link.command = "!lastlink"
+last_link.helptext = "Usage: !lastlink\nShows the last URL that was posted in the channel"
 
