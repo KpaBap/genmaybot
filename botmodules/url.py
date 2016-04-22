@@ -178,8 +178,9 @@ def last_link(self, e):
     if (cursor.execute("SELECT url FROM links ORDER BY rowid DESC LIMIT 1")):
         result = cursor.fetchone()
         url = result[0]
-    conn.close()    
-    return url
+    conn.close()
+    e.output = url
+    return e
 
 last_link.command = "!lastlink"
 last_link.helptext = "Usage: !lastlink\nShows the last URL that was posted in the channel"
