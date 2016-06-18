@@ -5,7 +5,7 @@ except: pass
 
 def get_wolfram(self, e):
     #query 'input' on wolframalpha and get the plaintext result back
-    e.output = 'Sorry, math has been disabled.
+    e.output = 'Sorry, math has been disabled.'
     return e
     try:
         location = e.location
