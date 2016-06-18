@@ -133,7 +133,8 @@ def get_title(self, e, url):
         length = 100096  # because amazon is coded like shit
     page = self.tools["load_html_from_URL"](url, length)
     title = ""
-
+    meta_title = ""
+    
     if page and page.find('meta', attrs={'name': "generator", 'content': re.compile("MediaWiki", re.I)}):
         try:
             wiki = self.bangcommands["!wiki"](self, e, True, True)
