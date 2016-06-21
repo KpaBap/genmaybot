@@ -1,4 +1,5 @@
 import urllib, urllib.request, urllib.error, urllib.parse, xml.dom.minidom, socket, traceback
+import random
 try: import botmodules.userlocation as user
 except: pass
 
@@ -41,7 +42,14 @@ def get_wolfram(self, e):
                 result = self.bangcommands["!error"](self, e).output
 
             output = query.replace("\n", " || ") + " :: " + result.replace("\n", " || ")
+            #Just for epon
+            final = ""
+            for char in output:
+                final += re.sub(r'[0-9]', str(int(random.random()*10)), char)
+            output = final
+            
             if e.nick == 'epon':
+                
                 e.output = 'LOL MATHS: ' + output
             else:
                 e.output = output
@@ -70,7 +78,7 @@ def wolfram_time(self, e):
             e.input = "current time in %s" % location
             return get_wolfram(self, e)
     else:
-        location = user.get_location(e.nick)
+        location = user.get_location(e.nick)!
         if location:
             e.input = "current time in %s" % location
             return get_wolfram(self, e)
