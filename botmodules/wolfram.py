@@ -42,14 +42,14 @@ def get_wolfram(self, e):
                 result = self.bangcommands["!error"](self, e).output
 
             output = query.replace("\n", " || ") + " :: " + result.replace("\n", " || ")
-            #Just for epon
-            final = ""
-            for char in output:
-                final += re.sub(r'[0-9]', str(int(random.random()*10)), char)
-            output = final
-            
+
             if e.nick == 'epon':
-                
+            #Just for epon
+                final = ""
+                for char in output:
+                    final += re.sub(r'[0-9]', str(int(random.random()*10)), char)
+                output = final
+            
                 e.output = 'LOL MATHS: ' + output
             else:
                 e.output = output
