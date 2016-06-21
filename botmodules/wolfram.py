@@ -78,7 +78,7 @@ def wolfram_time(self, e):
             e.input = "current time in %s" % location
             return get_wolfram(self, e)
     else:
-        location = user.get_location(e.nick)!
+        location = user.get_location(e.nick)
         if location:
             e.input = "current time in %s" % location
             return get_wolfram(self, e)
