@@ -5,8 +5,6 @@ except: pass
 
 def get_wolfram(self, e):
     #query 'input' on wolframalpha and get the plaintext result back
-    e.output = 'Sorry, math has been disabled.'
-    return e
     try:
         location = e.location
     except:
@@ -43,7 +41,10 @@ def get_wolfram(self, e):
                 result = self.bangcommands["!error"](self, e).output
 
             output = query.replace("\n", " || ") + " :: " + result.replace("\n", " || ")
-            e.output = output
+            if e.nick == 'epon':
+                e.output = 'LOL MATHS: ' + output
+            else:
+                e.output = output
             return e
         except Exception as inst:
             traceback.print_exc()
