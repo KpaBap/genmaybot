@@ -1,5 +1,5 @@
 import re
-import math
+import math as notmath
 
 
 def call_stemcalc(self, e):
@@ -134,17 +134,17 @@ class StemCalc:
 
     def calculate_reach(self, stem):
         stem_radians = self.calculate_stem_radians(stem)
-        reach = stem['length'] * math.cos(stem_radians)
+        reach = stem['length'] * notmath.cos(stem_radians)
         return reach + self.calculate_spacer_reach_adjustment(stem)
 
     def calculate_stack(self, stem):
         stem_radians = self.calculate_stem_radians(stem)
-        stack = stem['length'] * math.sin(stem_radians)
+        stack = stem['length'] * notmath.sin(stem_radians)
         return stack + self.calculate_spacer_stack_adjustment(stem)
 
     def calculate_stem_radians(self, stem):
         stem_degrees = float(90) - self.headtube + stem['angle']
-        stem_radians = math.radians(stem_degrees)
+        stem_radians = notmath.radians(stem_degrees)
         return stem_radians
 
     def calculate_spacer_reach_adjustment(self, stem):
