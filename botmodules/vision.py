@@ -31,7 +31,7 @@ def image_vision(self, e):
     class tmp(): pass
     tmpevent = tmp()
     tmpevent.output = ""
-    print "Vision input ({})".format(e.input)
+    print ("Vision input ({})".format(e.input))
     url = last_link("", tmpevent).output
     
     if not url_is_image(url):
