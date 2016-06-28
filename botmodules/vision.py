@@ -11,7 +11,7 @@ def set_msvisionkey(line, nick, self, c):
 set_msvisionkey.admincommand = "msvisionkey"
 
 def url_is_image(url):
-    url = re.search(r"(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>])*\))+(?:\(([^\s()<>])*\)|[^\s`!()\[\]{};:'\".,<>?«»“”‘’]))", e.input)
+    url = re.search(r"(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>])*\))+(?:\(([^\s()<>])*\)|[^\s`!()\[\]{};:'\".,<>?«»“”‘’]))", url)
     #http://daringfireball.net/2010/07/improved_regex_for_matching_urls
     if url:
         url = url.group(0)
