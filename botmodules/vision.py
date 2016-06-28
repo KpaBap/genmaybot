@@ -4,7 +4,11 @@ import urllib
 
 from url import last_link
 
-  
+def set_msvisionkey(line, nick, self, c):
+  self.botconfig["APIkeys"]["msvisionkey"] = line[11:]
+  with open('genmaybot.cfg', 'w') as configfile:
+      self.botconfig.write(configfile)
+set_msvisionkey.admincommand = "msvisionkey"
 
 def url_is_image(url):
     url = re.search(r"(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>])*\))+(?:\(([^\s()<>])*\)|[^\s`!()\[\]{};:'\".,<>?«»“”‘’]))", e.input)
@@ -29,6 +33,9 @@ def image_vision(self, e):
     tmpevent.output = ""
     
     url = last_link("", tmpevent)
+    
+    if not url_is_image(url):
+      return e
     
     values = json.dumps({"url": e.input})
     print(values)
