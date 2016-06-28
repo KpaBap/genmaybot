@@ -32,7 +32,7 @@ def image_vision(self, e):
     tmpevent = tmp()
     tmpevent.output = ""
     
-    url = last_link("", tmpevent)
+    url = last_link("", tmpevent).output
     
     if not url_is_image(url):
       return e
