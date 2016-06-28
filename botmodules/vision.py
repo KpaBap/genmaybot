@@ -37,7 +37,7 @@ def image_vision(self, e):
     if not url_is_image(url):
       return e
     
-    values = json.dumps({"url": e.input})
+    values = json.dumps({"url": url})
     print(values)
     requestUrl = "https://api.projectoxford.ai/vision/v1.0/analyze?visualFeatures=Description,Adult"
     headers = {'Ocp-Apim-Subscription-Key' : key,
