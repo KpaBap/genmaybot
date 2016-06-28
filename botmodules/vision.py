@@ -15,12 +15,12 @@ def url_is_image(url):
     #http://daringfireball.net/2010/07/improved_regex_for_matching_urls
     if url:
         url = url.group(0)
-        if url[0:4].lower() != "http":
-            url = "http://" + url
-        if ".jpg" in url or ".png" in url or ".gif" in url or ".jpeg" in url:
-            return True
+        req = urllib.request.Request(url, method="HEAD")
+        resp = urllib.request.urlopen(req)
+        if "image" inresp.getheader("Content-Type")
+          return True
         else: 
-            return False
+          return False
     else:
         return False
 
