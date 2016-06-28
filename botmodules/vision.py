@@ -17,7 +17,7 @@ def url_is_image(url):
         url = url.group(0)
         req = urllib.request.Request(url, method="HEAD")
         resp = urllib.request.urlopen(req)
-        if "image" inresp.getheader("Content-Type")
+        if "image" in resp.getheader("Content-Type")
           return True
         else: 
           return False
