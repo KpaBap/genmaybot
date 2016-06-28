@@ -1,0 +1,61 @@
+import re
+import json
+import urllib
+
+from url import last_link
+
+  
+
+def url_is_image(url):
+    url = re.search(r"(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>])*\))+(?:\(([^\s()<>])*\)|[^\s`!()\[\]{};:'\".,<>?«»“”‘’]))", e.input)
+    #http://daringfireball.net/2010/07/improved_regex_for_matching_urls
+    if url:
+        url = url.group(0)
+        if url[0:4].lower() != "http":
+            url = "http://" + url
+        if ".jpg" in url or ".png" in url or ".gif" in url or ".jpeg" in url:
+            return True
+        else: 
+            return False
+    else:
+        return False
+
+
+def image_vision(self, e):
+    key = self.botconfig["APIkeys"]["msvisionkey"]
+    
+    class tmp(): pass
+    tmpevent = tmp()
+    tmpevent.output = ""
+    
+    url = last_link("", tmpevent)
+    
+    values = json.dumps({"url": e.input})
+    print(values)
+    requestUrl = "https://api.projectoxford.ai/vision/v1.0/analyze?visualFeatures=Description,Adult"
+    headers = {'Ocp-Apim-Subscription-Key' : key,
+               'Content-Type': 'application/json'}
+    req = urllib.request.Request(requestUrl, values.encode(), headers)
+    response = urllib.request.urlopen(req)
+    results = json.loads(response.read().decode('utf-8'))
+
+    print(results)
+
+    caption = results["description"]["captions"][0]["text"]
+    capconfidence = int(results["description"]["captions"][0]["confidence"] * 100)
+
+    adult = results["adult"]["isAdultContent"]
+    racy = results["adult"]["isRacyContent"]
+
+    adultstring = ""
+    if adult:
+       aconfidence = results["adult"]["adultScore"]
+       adultstring += " \002NSFW\002 - {}% confidence".format(int(aconfidence * 100))
+    elif racy:
+      aconfidence = results["adult"]["racyScore"]
+      adultstring += " \002NSFW\002ish - {}% confidence".format(int(aconfidence * 100))
+
+    e.output = '"{}" - {}% confidence{}'.format(caption, capconfidence, adultstring)
+
+    return e
+image_vision.command = "!vision"
