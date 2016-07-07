@@ -61,10 +61,10 @@ def image_vision(self, e):
     adultstring = ""
     if adult:
        aconfidence = results["adult"]["adultScore"]
-       adultstring += " \002NSFW\002 - {}% confidence".format(int(aconfidence * 100))
+       adultstring += " NSFW - {}% confidence".format(int(aconfidence * 100))
     elif racy:
       aconfidence = results["adult"]["racyScore"]
-      adultstring += " \002NSFW\002ish - {}% confidence".format(int(aconfidence * 100))
+      adultstring += " NSFWish - {}% confidence".format(int(aconfidence * 100))
 
     e.output = '"{}" - {}% confidence{}'.format(caption, capconfidence, adultstring)
 
