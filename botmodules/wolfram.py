@@ -11,7 +11,7 @@ def get_wolfram(self, e):
     except:
         location = ""
     
-    if e.input.find("bmi" != -1:
+    if e.input.find("bmi") != -1:
         e.output = "Eat the whole cake, you deserve it."
         return e
     
