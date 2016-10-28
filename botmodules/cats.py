@@ -86,6 +86,12 @@ def get_roznalos(self, e):
 get_roznalos.command ="!roznalos"
 get_roznalos.helptext = "Poor roznalos!"
 
+def get_gumby(self, e):
+    e.output = "http://imgur.com/Es8FioK"
+    return e
+get_roznalos.command ="!gumby"
+get_roznalos.helptext = "D'awww!"
+
 def faptain(self, e):
     e.output = "FaptainAwesome to the rescue!"
     return e
