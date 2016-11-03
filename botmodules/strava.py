@@ -499,6 +499,71 @@ strava_parent.command = "!strava"
 strava_parent.helptext = "Fetch last ride: \"!strava [optional nick]\", Set your ID: \"!strava set <athelete id>\", Reset your ID: \"!strava reset\", List achievements for a ride: \"!strava achievements <ride id>\", Allow the bot to read your private rides: \"!strava auth\""
 
 
+def epon(self, e):
+    strava_id = strava_get_athlete(e.nick)
+    # set the token for the current user
+    token = strava_get_token(e.nick)
+
+    if check_strava_token(token):
+        request_json.token = token
+    else:
+        request_json.token = self.botconfig["APIkeys"]["stravaToken"]
+
+    if e.input.isdigit():
+        try:
+            if strava_is_valid_user(e.input):
+                # Process a last ride request for a specific strava id.
+                rides_response = request_json("https://www.strava.com/api/v3/athletes/%s/activities" % e.input)
+                e.output = strava_extract_latest_epon_ride(rides_response, e, e.input)
+            else:
+                e.output = "Sorry, that is not a valid Strava user."
+        except urllib.error.URLError:
+            e.output = "Unable to retrieve rides from Strava ID: %s. The user may need to do: !strava auth" % (e.input)
+    elif e.input:
+        athlete_id = strava_get_athlete(e.input)
+        # set the token for the provided user, if we have it
+        token = strava_get_token(e.input)
+
+        if check_strava_token(token):
+            request_json.token = token
+        else:
+            request_json.token = self.botconfig["APIkeys"]["stravaToken"]
+
+        if athlete_id:
+            try:
+                if strava_is_valid_user(athlete_id):
+                    # Process a last ride request for a specific strava id.
+                    rides_response = request_json("https://www.strava.com/api/v3/athletes/%s/activities" % athlete_id)
+                    e.output = strava_extract_latest_epon_ride(rides_response, e, athlete_id)
+                else:
+                    e.output = "Sorry, that is not a valid Strava user."
+            except urllib.error.URLError:
+                e.output = "Unable to retrieve rides from Strava ID: %s. The user may need to do: !strava auth" % (
+                    athlete_id)
+        else:
+            # We still have some sort of string, but it isn't numberic.
+            e.output = "Sorry, %s is not a valid Strava ID." % (e.input)
+    elif strava_id:
+        try:
+            if strava_is_valid_user(strava_id):
+                # Process the last ride for the current strava id.
+                rides_response = request_json("https://www.strava.com/api/v3/athletes/%s/activities" % strava_id)
+                e.output = strava_extract_latest_epon_ride(rides_response, e, strava_id)
+            else:
+                e.output = "Sorry, that is not a valid Strava user."
+        except urllib.error.URLError:
+            e.output = "Unable to retrieve rides from Strava ID: %s. The user may need to do: !strava auth" % (
+                strava_id)
+    else:
+        e.output = "Sorry %s, you don't have a Strava ID setup yet, please enter one with the !strava set [id] command. Also run !strava auth if you have Strava privacy enabled. Remember, if it's not on Strava, it didn't happen." % (
+            e.nick)
+    return e
+
+
+epon.command = "!epon"
+epon.helptext = "Get off my lawn!"
+
+
 def strava_help(self, e):
     e.output += strava_parent.helptext
     return e
@@ -577,6 +642,21 @@ def strava_extract_latest_ride(response, e, athlete_id=None):
         e.nick)
 
 
+def strava_extract_latest_epon_ride(response, e, athlete_id=None):
+    """ Grab the latest ride from a list of rides and gather some statistics about it """
+    if response:
+        recent_ride = response[0]
+        recent_ride = strava_get_ride_extended_info(recent_ride['id'])
+        if recent_ride:
+            return strava_ride_to_epon(recent_ride, athlete_id)
+        else:
+            return "Sorry %s, an error has occured attempting to retrieve the most recent ride's details. They said Ruby was webscale..." % (
+            e.nick)
+    else:
+        return "Sorry %s, no rides have been recorded yet. You may need to run '!strava auth' Remember, if it's not on Strava, it didn't happen." % (
+        e.nick)
+
+
 def strava_ride_to_string(recent_ride, athlete_id=None):  # if the athlete ID is missing we can default to mph
     # Convert a lot of stuff we need to display the message
     moving_time = str(datetime.timedelta(seconds=recent_ride['moving_time']))
@@ -595,38 +675,53 @@ def strava_ride_to_string(recent_ride, athlete_id=None):  # if the athlete ID is
         measurement_pref = None
 
     if measurement_pref == "feet" or athlete_id == None or measurement_pref == None:
+        mph = strava_convert_meters_per_second_to_miles_per_hour(recent_ride['average_speed'])
+        miles = strava_convert_meters_to_miles(recent_ride['distance'])
+        max_mph = strava_convert_meters_per_second_to_miles_per_hour(recent_ride['max_speed'])
+        feet_climbed = strava_convert_meters_to_feet(recent_ride['total_elevation_gain'])
+        # Output string
+        return_string = "%s on %s (http://www.strava.com/activities/%s)\n" % (recent_ride['name'], time_start, recent_ride['id'])
+        return_string += "Ride Stats: %s mi in %s | %s mph average / %s mph max | %s feet climbed" % (miles, moving_time, mph, max_mph, int(feet_climbed))
+    elif measurement_pref == "meters":
+        kmh = round(float(recent_ride['average_speed']) * 3.6, 1)  # meters per second to km/h
+        km = round(float(recent_ride['distance'] / 1000), 1)  # meters to km
+        max_kmh = round(float(recent_ride['max_speed']) * 3.6, 1)  # m/s to km/h
+        m_climbed = recent_ride['total_elevation_gain']
+        return_string = "%s on %s (http://www.strava.com/activities/%s)\n" % (recent_ride['name'], time_start, recent_ride['id'])
+        return_string += "Ride Stats: %s km in %s | %s km/h average / %s km/h max | %s meters climbed" % (km, moving_time, kmh, max_kmh, int(m_climbed))
 
+    # Figure out if we need to add average watts to the string.
+    # Users who don't have a weight won't have average watts.
+    if 'average_watts' in recent_ride:
+        return_string += " | %s watts average power" % (int(recent_ride['average_watts']))
+        if avg_hr > 0:
+            return_string += " | %s watts/bpm" % (round(recent_ride['average_watts']/avg_hr, 2))
+
+    return return_string
+
+
+def strava_ride_to_epon(recent_ride, athlete_id=None):  # if the athlete ID is missing we can default to mph
+    # Convert a lot of stuff we need to display the message
+    if athlete_id:
+        measurement_pref = strava_get_measurement_pref(athlete_id)
+    else:
+        measurement_pref = None
+
+    if measurement_pref == "feet" or athlete_id == None or measurement_pref == None:
         mph = strava_convert_meters_per_second_to_miles_per_hour(recent_ride['average_speed'])
         mph = str(mph)
         mph = mph.replace('.', '/')
         miles = strava_convert_meters_to_miles(recent_ride['distance'])
         miles = int(miles)
-        max_mph = strava_convert_meters_per_second_to_miles_per_hour(recent_ride['max_speed'])
-        feet_climbed = strava_convert_meters_to_feet(recent_ride['total_elevation_gain'])
-        # Output string
-        #         return_string = "%s on %s (http://www.strava.com/activities/%s)\n" % (recent_ride['name'], time_start, recent_ride['id'])
-        #         return_string += "Ride Stats: %s mi in %s | %s mph average / %s mph max | %s feet climbed" % (miles, moving_time, mph, max_mph, int(feet_climbed))
         return_string = "%s@%s" % (miles, mph)
-
     elif measurement_pref == "meters":
         kmh = round(float(recent_ride['average_speed']) * 3.6, 1)  # meters per second to km/h
         kmh = str(kmh)
         kmh = kmh.replace('.', '/')
         km = round(float(recent_ride['distance'] / 1000), 1)  # meters to km
         km = int(km)
-        max_kmh = round(float(recent_ride['max_speed']) * 3.6, 1)  # m/s to km/h
-        m_climbed = recent_ride['total_elevation_gain']
-        #         return_string = "%s on %s (http://www.strava.com/activities/%s)\n" % (recent_ride['name'], time_start, recent_ride['id'])
-        #         return_string += "Ride Stats: %s km in %s | %s km/h average / %s km/h max | %s meters climbed" % (km, moving_time, kmh, max_kmh, int(m_climbed))
         return_string = "%s@%s" % (km, kmh)
 
-
-        # Figure out if we need to add average watts to the string.
-        # Users who don't have a weight won't have average watts.
-    #     if 'average_watts' in recent_ride:
-    #         return_string += " | %s watts average power" % (int(recent_ride['average_watts']))
-    #         if avg_hr > 0: 
-    #             return_string += " | %s watts/bpm" % (round(recent_ride['average_watts']/avg_hr,2))
     return return_string
 
 
