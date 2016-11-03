@@ -845,14 +845,14 @@ def sentencify(text):
                  "agreeable, blessed, congenial, darling, delectable, delicious, delightful, " \
                  "dreamy, dulcet, enjoyable, felicitous, good, grateful, gratifying, heavenly, jolly, luscious, " \
                  "pleasant, palatable, pleasing, pleasurable, pretty, satisfying, savory, sweet, tasty, " \
-                 "welcome,  abominable, ghastly, god-awful, hellish, horrid, miserable, wretched; bilious, " \
+                 "welcome,  abominable, ghastly, god-awful, hellish, horrid, miserable, wretched, bilious, " \
                  "disgusting, distasteful, obnoxious, offensive, repugnant, repulsive, revulsive, unsavory, " \
                  "vile, yucky, abhorrent, detestable, hateful, boring, dull, " \
                  "flat, insipid, irksome, stale, tedious, displeasing, dissatisfying, depressing, disheartening, " \
                  "dismal, dreary, gloomy, heartbreaking, heartrending, joyless, sad, unhappy, deplorable," \
                  " doleful, dolorous, lamentable, lugubrious, mournful, regrettable, sorrowful, tragic, aggravating, " \
-                 "annoying, exasperating, irritating, peeving, perturbing, vexing, forbidding; hostile, intimidating," \
-                 " angering, enraging, infuriating, maddening, outraging, rankling, riling; distressing, disturbing, " \
+                 "annoying, exasperating, irritating, peeving, perturbing, vexing, forbidding, hostile, intimidating," \
+                 " angering, enraging, infuriating, maddening, outraging, rankling, riling, distressing, disturbing, " \
                  "upsetting".split(", ")
 
     picked_adjective = adjectives[random.randint(0, len(adjectives)-1)]
