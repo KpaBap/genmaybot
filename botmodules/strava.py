@@ -7,7 +7,7 @@ import time
 import cherrypy, threading
 from urllib.parse import urlparse
 from bs4 import BeautifulSoup
-
+import random
 
 class webServer:
     def __init__(self, strava_client_secret,
@@ -535,6 +535,7 @@ def epon(self, e):
                     # Process a last ride request for a specific strava id.
                     rides_response = request_json("https://www.strava.com/api/v3/athletes/%s/activities" % athlete_id)
                     e.output = strava_extract_latest_epon_ride(rides_response, e, athlete_id)
+                    e.output = sentencify(e.output)
                 else:
                     e.output = "Sorry, that is not a valid Strava user."
             except urllib.error.URLError:
@@ -549,6 +550,7 @@ def epon(self, e):
                 # Process the last ride for the current strava id.
                 rides_response = request_json("https://www.strava.com/api/v3/athletes/%s/activities" % strava_id)
                 e.output = strava_extract_latest_epon_ride(rides_response, e, strava_id)
+                e.output = sentencify(e.output)
             else:
                 e.output = "Sorry, that is not a valid Strava user."
         except urllib.error.URLError:
@@ -834,3 +836,55 @@ def strava_convert_meters_to_feet(meters):
     """ Convert meters to feet. """
     feet = 3.28084 * float(meters)
     return round(feet, 1)
+
+def sentencify(text):
+    adjectives = "befitting, correct, decent, decorous, genteel, proper, polite, respectable, seemly, acceptable, " \
+                 "adequate, satisfactory, tolerable, dignified, elegant, gracious, stiff, stuffy, apt, congenial, " \
+                 "harmonious, kosher, permitted, intolerable, unacceptable, unsatisfactory, " \
+                 "casual, grungy, informal, seedy, shabby, tacky, awkward, ungraceful, " \
+                 "agreeable, blessed, congenial, darling, delectable, delicious, delightful, " \
+                 "dreamy, dulcet, enjoyable, felicitous, good, grateful, gratifying, heavenly, jolly, luscious, " \
+                 "pleasant, palatable, pleasing, pleasurable, pretty, satisfying, savory, sweet, tasty, " \
+                 "welcome,  abominable, ghastly, god-awful, hellish, horrid, miserable, wretched; bilious, " \
+                 "disgusting, distasteful, obnoxious, offensive, repugnant, repulsive, revulsive, unsavory, " \
+                 "vile, yucky, abhorrent, detestable, hateful, boring, dull, " \
+                 "flat, insipid, irksome, stale, tedious, displeasing, dissatisfying, depressing, disheartening, " \
+                 "dismal, dreary, gloomy, heartbreaking, heartrending, joyless, sad, unhappy, deplorable," \
+                 " doleful, dolorous, lamentable, lugubrious, mournful, regrettable, sorrowful, tragic, aggravating, " \
+                 "annoying, exasperating, irritating, peeving, perturbing, vexing, forbidding; hostile, intimidating," \
+                 " angering, enraging, infuriating, maddening, outraging, rankling, riling; distressing, disturbing, " \
+                 "upsetting".split(", ")
+
+    picked_adjective = adjectives[random.randint(0, len(adjectives)-1)]
+
+    if picked_adjective[0] in ["a", "e", "i", "o", "u"]:
+        adjective_article = "an"
+    else:
+        adjective_article = "a"
+
+    ride_synonyms = "drive, spin, turn, joyride, conveyance, passage, transit, transport, twirl, whirl, round, jaunt, " \
+                    "orbit, excursion, ramble, expedition, odyssey, trek, journey, voyage,  roll, cruise, meander, stroll".split(", ")
+
+    picked_ride = ride_synonyms[random.randint(0, len(ride_synonyms)-1)]
+
+
+    touch_synonyms = "bit, crumb, dab, dram, driblet, glimmer, hint, lick, little, tad, nip, ounce, " \
+                     "ray, shade, shadow, shred, smell, smidgen, speck, splash, spot, sprinkling, trace, " \
+                     "iota, semblance, grain, dash, drop, sliver, part, pinch, morsel, chunk, pile, wad, load, bunch".split(", ")
+
+    picked_touch = touch_synonyms[random.randint(0, len(touch_synonyms)-1)]
+
+    if picked_touch[0] in ["a", "e", "i", "o", "u"]:
+        touch_article = "an"
+    else:
+        touch_article = "a"
+
+    last_nouns = "descent, dip, dive, drop, fall, nosedive, plunge, boost, hike, elevation, ascent, rise, climb, " \
+                 "effort, pain, labor, grind, sweat, toil, slog, struggle". split(", ")
+
+    picked_noun = last_nouns[random.randint(0, len(last_nouns)-1)]
+
+
+
+    return "{} {} {} {} with {} {} of {}".format(adjective_article, picked_adjective, text,
+                                                    picked_ride, touch_article, picked_touch, picked_noun)
