@@ -54,9 +54,7 @@ def command_handler(event, command):
 		# ADD <VAL>
 		# "add I'm a hero"
 		if(is_add_arg(words, arg_offset)):
-			if nick == 'epon':
-				add_to_irc_output("\nSay no to shitty quotes")
-			elif not (set_function_dict[command](words[val_offset:], command)):
+			if not (set_function_dict[command](words[val_offset:], command)):
 				add_to_irc_output("\nFailed to add duplicate quote")
 		
 		elif(is_search_arg(words, arg_offset)):
