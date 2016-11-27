@@ -38,6 +38,7 @@ def get_imdb(self, e, urlposted=False):
                 summary = self.tools['remove_html_tags'](summary)
                 summary = summary.replace('&raquo;', "")
                 summary = summary.replace("\n", "")
+                summary = summary.strip()
                 summary = " - " + summary
             except:
                 print ("Unexpected error:", sys.exc_info()[0])
