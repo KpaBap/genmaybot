@@ -23,8 +23,8 @@ def get_imdb(self, e, urlposted=False):
         movietitle = movietitle.replace("IMDb - ", "")
         movietitle = "Title: " + movietitle
 
-        if page.find(id="overview-top") != None:
-            page = page.find(id="overview-top").extract()
+        if page.find(id="title-overview") != None:
+            page = page.find(id="title.overview").extract()
 
             if page.find("span", itemprop="ratingValue") != None:
                 rating = page.find("span", itemprop="ratingValue").text
@@ -32,7 +32,7 @@ def get_imdb(self, e, urlposted=False):
 
             try:
 
-                summary = str(page.find('p', itemprop='description'))
+                summary = str(page.find("div", {"class":"summary_text"}, itemprop="description"))
 
                 summary = re.sub(r'\<a.*\/a\>', '', summary)
                 summary = self.tools['remove_html_tags'](summary)
