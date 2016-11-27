@@ -26,8 +26,8 @@ def get_imdb(self, e, urlposted=False):
         if page.find(id="overview-top") != None:
             page = page.find(id="overview-top").extract()
 
-            if page.find("div", "star-box-giga-star") != None:
-                rating = self.tools['remove_html_tags'](str(page.find("div", "star-box-giga-star").text))
+            if page.find("span", itemprop="ratingValue") != None:
+                rating = page.find("span", itemprop="ratingValue").text
                 rating = " - Rating: " + rating.replace("\n", "")  # remove newlines since BS4 adds them in there
 
             try:
