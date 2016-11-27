@@ -1,5 +1,5 @@
 import re
-
+import sys
 
 def get_imdb(self, e, urlposted=False):
     #reads title, rating, and movie description of movie titles
@@ -40,7 +40,8 @@ def get_imdb(self, e, urlposted=False):
                 summary = summary.replace("\n", "")
                 summary = " - " + summary
             except:
-                pass
+                print ("Unexpected error:", sys.exc_info()[0])
+
 
         title = movietitle + rating + summary
         if not urlposted:
