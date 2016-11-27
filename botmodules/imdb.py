@@ -23,8 +23,8 @@ def get_imdb(self, e, urlposted=False):
         movietitle = movietitle.replace("IMDb - ", "")
         movietitle = "Title: " + movietitle
 
-        if page.find(id="title-overview") != None:
-            page = page.find(id="title.overview").extract()
+        if page.find("div", {"class":"title-overview"}) != None:
+            page = page.find("div", {"class":"title-overview"}).extract()
 
             if page.find("span", itemprop="ratingValue") != None:
                 rating = page.find("span", itemprop="ratingValue").text
