@@ -694,7 +694,11 @@ def strava_ride_to_string(recent_ride, athlete_id=None):  # if the athlete ID is
 
     # Figure out if we need to add average watts to the string.
     # Users who don't have a weight won't have average watts.
-    if 'average_watts' in recent_ride:
+    if 'weighted_average_watts' in recent_ride:
+        return_string += " | %s watts avg power (weighted)" % (int(recent_ride['weighted_average_watts']))
+        if avg_hr > 0:
+            return_string += " | %s watts/bpm" % (round(recent_ride['weighted_average_watts']/avg_hr, 2))
+    elif 'average_watts' in recent_ride:
         return_string += " | %s watts average power" % (int(recent_ride['average_watts']))
         if avg_hr > 0:
             return_string += " | %s watts/bpm" % (round(recent_ride['average_watts']/avg_hr, 2))
