@@ -344,7 +344,7 @@ def strava(self, e):
             if strava_is_valid_user(e.input):
                 # Process a last ride request for a specific strava id.
                 rides_response = request_json("https://www.strava.com/api/v3/athletes/%s/activities" % e.input)
-                e.output = strava_extract_latest_ride(rides_response, e, e.input)
+                e.output = strava_extract_latest_ride(rides_response, e, e.input, dvq=(e.input == "dvq"))
             else:
                 e.output = "Sorry, that is not a valid Strava user."
         except urllib.error.URLError:
@@ -631,11 +631,12 @@ def clean_arg_from_input(string):
 
 def strava_extract_latest_ride(response, e, athlete_id=None):
     """ Grab the latest ride from a list of rides and gather some statistics about it """
+
     if response:
         recent_ride = response[0]
         recent_ride = strava_get_ride_extended_info(recent_ride['id'])
         if recent_ride:
-            return strava_ride_to_string(recent_ride, athlete_id)
+            return strava_ride_to_string(recent_ride, athlete_id, dvq=(e.nick == "dvq"))
         else:
             return "Sorry %s, an error has occured attempting to retrieve the most recent ride's details. They said Ruby was webscale..." % (
             e.nick)
@@ -659,7 +660,7 @@ def strava_extract_latest_epon_ride(response, e, athlete_id=None):
         e.nick)
 
 
-def strava_ride_to_string(recent_ride, athlete_id=None):  # if the athlete ID is missing we can default to mph
+def strava_ride_to_string(recent_ride, athlete_id=None, dvq=False):  # if the athlete ID is missing we can default to mph
     # Convert a lot of stuff we need to display the message
     moving_time = str(datetime.timedelta(seconds=recent_ride['moving_time']))
     ride_datetime = time.strptime(recent_ride['start_date_local'], "%Y-%m-%dT%H:%M:%SZ")
@@ -694,7 +695,7 @@ def strava_ride_to_string(recent_ride, athlete_id=None):  # if the athlete ID is
 
     # Figure out if we need to add average watts to the string.
     # Users who don't have a weight won't have average watts.
-    if 'weighted_average_watts' in recent_ride:
+    if 'weighted_average_watts' in recent_ride and not dvq:
         return_string += " | %s watts avg power (weighted)" % (int(recent_ride['weighted_average_watts']))
         if avg_hr > 0:
             return_string += " | %s watts/bpm" % (round(recent_ride['weighted_average_watts']/avg_hr, 2))
