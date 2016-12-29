@@ -364,7 +364,7 @@ def strava(self, e):
                 if strava_is_valid_user(athlete_id):
                     # Process a last ride request for a specific strava id.
                     rides_response = request_json("https://www.strava.com/api/v3/athletes/%s/activities" % athlete_id)
-                    e.output = strava_extract_latest_ride(rides_response, e, athlete_id)
+                    e.output = strava_extract_latest_ride(rides_response, e, athlete_id, dvq=(e.input == "dvq"))
                 else:
                     e.output = "Sorry, that is not a valid Strava user."
             except urllib.error.URLError:
@@ -378,7 +378,7 @@ def strava(self, e):
             if strava_is_valid_user(strava_id):
                 # Process the last ride for the current strava id.
                 rides_response = request_json("https://www.strava.com/api/v3/athletes/%s/activities" % strava_id)
-                e.output = strava_extract_latest_ride(rides_response, e, strava_id)
+                e.output = strava_extract_latest_ride(rides_response, e, strava_id, dvq=(e.input == "dvq"))
             else:
                 e.output = "Sorry, that is not a valid Strava user."
         except urllib.error.URLError:
