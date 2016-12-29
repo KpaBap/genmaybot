@@ -344,7 +344,7 @@ def strava(self, e):
             if strava_is_valid_user(e.input):
                 # Process a last ride request for a specific strava id.
                 rides_response = request_json("https://www.strava.com/api/v3/athletes/%s/activities" % e.input)
-                e.output = strava_extract_latest_ride(rides_response, e, e.input, dvq=(e.input == "dvq"))
+                e.output = strava_extract_latest_ride(rides_response, e, e.input)
             else:
                 e.output = "Sorry, that is not a valid Strava user."
         except urllib.error.URLError:
@@ -364,7 +364,7 @@ def strava(self, e):
                 if strava_is_valid_user(athlete_id):
                     # Process a last ride request for a specific strava id.
                     rides_response = request_json("https://www.strava.com/api/v3/athletes/%s/activities" % athlete_id)
-                    e.output = strava_extract_latest_ride(rides_response, e, athlete_id, dvq=(e.input == "dvq"))
+                    e.output = strava_extract_latest_ride(rides_response, e, athlete_id)
                 else:
                     e.output = "Sorry, that is not a valid Strava user."
             except urllib.error.URLError:
@@ -378,7 +378,7 @@ def strava(self, e):
             if strava_is_valid_user(strava_id):
                 # Process the last ride for the current strava id.
                 rides_response = request_json("https://www.strava.com/api/v3/athletes/%s/activities" % strava_id)
-                e.output = strava_extract_latest_ride(rides_response, e, strava_id, dvq=(e.input == "dvq"))
+                e.output = strava_extract_latest_ride(rides_response, e, strava_id)
             else:
                 e.output = "Sorry, that is not a valid Strava user."
         except urllib.error.URLError:
@@ -636,7 +636,7 @@ def strava_extract_latest_ride(response, e, athlete_id=None):
         recent_ride = response[0]
         recent_ride = strava_get_ride_extended_info(recent_ride['id'])
         if recent_ride:
-            return strava_ride_to_string(recent_ride, athlete_id, dvq=(e.nick == "dvq"))
+            return strava_ride_to_string(recent_ride, athlete_id, dvq=(e.nick == "dvq" or e.input == "dvq"))
         else:
             return "Sorry %s, an error has occured attempting to retrieve the most recent ride's details. They said Ruby was webscale..." % (
             e.nick)
