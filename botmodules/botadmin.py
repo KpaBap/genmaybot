@@ -85,7 +85,7 @@ monitor_pm.admincommand="monitorpm"
 def manual_spamban(line, nick, self, c):
     try:
         command, hostmask, minutes = line.split(" ")
-        if minutes < 2:
+        if int(minutes) < 2:
             minutes = 2
     except:
         return "Command format is: spamban user@host <number of minutes to ban>"
