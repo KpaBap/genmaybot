@@ -83,7 +83,16 @@ monitor_pm.admincommand="monitorpm"
 
 #test commit
 def manual_spamban(line, nick, self, c):
-    return "spamban called with line: {}".format(line)
+    try:
+        command, hostmask, minutes = line.split(" ")
+        if minutes < 2:
+            minutes = 2
+    except:
+	return "Command format is: spamban user@host <number of minutes to ban>"
+    self.spam[user] = {}
+    bancount = (int(minutes)*60)/15
+    self.spam[user]['count'] = bancount
+    return "Banned hostmask <{}> for {} minutes".format(hostmask, minutes)
 
 manual_spamban.admincommand = "spamban"
 
