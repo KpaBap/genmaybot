@@ -92,6 +92,9 @@ def manual_spamban(line, nick, self, c):
     self.spam[hostmask] = {}
     bancount = (int(minutes)*60)/15
     self.spam[hostmask]['count'] = bancount
+    self.spam[user]['last'] = time.time()
+    self.spam[user]['first'] = time.time()
+    self.spam[user]['limit'] = 0
     return "Banned hostmask <{}> for {} minutes".format(hostmask, minutes)
 
 manual_spamban.admincommand = "spamban"
