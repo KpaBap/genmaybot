@@ -1,31 +1,49 @@
-# Vagrant Easy Setup
+# Snoonet #bicycling Bot
+A python bot running on snoonet's #bicycling channel.
 
-1. Install Vagrant (http://www.vagrantup.com/)
-2. Copy genmaybot.cfg.example to genmaybot.cfg and change the config.
-3. cd into the repo's working directory.
-4. vagrant up
-5. Profit, or develop or something?
+## Requirements
+* python3
+* [pip](https://pip.pypa.io/en/stable/installing/)
+* [virtualenv](https://virtualenv.pypa.io/en/stable/installation/)
 
-# Manual Setup (dvq sucks at linux)
+## Setup
+The following instructions have been provided to setup, run and develop this bot. 
 
-This is the Python 3.x branch - it works, for Brak's pleasure.
+### 1.) Checkout the code & setup your genmaybot.cfg
+`$ git clone -b cycling git@github.com:KpaBap/genmaybot.git bicyclingbot`
+This will checkout the `cycling` branch of this project into the folder bicyclingbot.
 
-The following non-standard Python modules need to be installed:
+Inside this folder the bot codebase you will find a `genmaybot.cfg.example`, make a copy of it and name it `genmaybot.cfg`. You can edit the various settings in this file to configure your bot.
 
-Python IRC Library
-http://python-irclib.sourceforge.net/
-Note: A Python3 compatible port has been included in this repo
+`$ cd bicyclingbot`
+`$ cp genmaybot.cfg.example genmaybot.cfg`
 
-BeautifulSoup 4.1.0
-http://www.crummy.com/software/BeautifulSoup/bs4/download/4.0/beautifulsoup4-4.1.0.tar.gz
-Note: run "2to3 -w bs4" before installing
+### 2.) virtualenv
+One of the following steps needs to be picked depending on wether or not your `python` version is linked to 2.x or 3.x.
+`$ python --version`
+If this returns 3.x then issue the following command (be sure you're in your bicyclingbot folder):
+`$ virtualenv venv`
+If this returns 2.x then issue then you'll need to find the path to your python3 executable and specifying it in virtualenv with the -p parameter.
+`$ which python3`
+This may output something like `/usr/local/bin/python3`, you'll need this for the following command:
+`$ virtualenv -p /usr/local/bin/python3 venv`
 
-CherryPy is required
-http://download.cherrypy.org/cherrypy/3.2.2/CherryPy-3.2.2.tar.gz
+This will setup your virtual environment for python and pip requirements, now you're ready to activate it by: 
+`$ source venv/bin/activate`
+You'll now see a `(venv)` in front of all your command prompts, if you ever need to drop out of this virtual environment, type `deactivate`.
 
-sqlite3 is required
+### 3.) Install requirments with pip
+`(venv) $ pip install -r requirements.txt`
+This will install all the python requirments to make your bot work.
 
-Remember to set your API keys and ident password in the .cfg
+### 4.) Starting your bot
+`(venv) $ python genmaybot.py`
 
-This bot is created as a learning project, and may not be suitable for production environments.
-No warranties or guarantees are given. The creators take no responsibilty for damage/attacks/etc.
+## TL;DR
+1. Checkout code
+2. Setup genmay.conf
+3. `$ virtualenv venv`
+  Or if python is defaulted to python2.x; `$ virtualenv -p /path/to/your/pythong3 venv`
+4. `$ source venv/bin/activate`
+5. `(venv) $ pip install -r requirements.txt`
+6. `(venv) $ python genmaybot.py`
