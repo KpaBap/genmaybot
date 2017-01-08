@@ -31,7 +31,6 @@ obj/
 [Rr]elease*/
 _ReSharper*/
 [Tt]est[Rr]esult*
-
 #ninja-ide
 *.nja
 .idea/
@@ -40,5 +39,4 @@ _ReSharper*/
 error_log
 event_log
 genmaybot.cfg
-support/beautifulsoup*
-support/python-irclib-0.4.8/build
+venv/
