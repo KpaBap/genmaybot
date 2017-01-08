@@ -11,7 +11,7 @@ def get_newest_rss(self, url):
     dom = xml.dom.minidom.parse(urllib.request.urlopen(url))
     newest_news = dom.getElementsByTagName('item')[0]
     title = newest_news.getElementsByTagName('title')[0].childNodes[0].data
-    description = BeautifulSoup(newest_news.getElementsByTagName('description')[0].childNodes[0].data)
+    description = BeautifulSoup(newest_news.getElementsByTagName('description')[0].childNodes[0].data, "html.parser")
 
     updated = dom.getElementsByTagName('pubDate')[0].childNodes[0].data
     updated = datetime.datetime.fromtimestamp(time.mktime(parsedate(updated)))

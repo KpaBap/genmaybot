@@ -100,7 +100,7 @@ def load_html_from_URL(url, readlength="", returnurl=False):
             page = pagetmp.read(int(readlength))
         else:
             page = pagetmp.read()
-        page = BeautifulSoup(page)
+        page = BeautifulSoup(page, "html.parser")
     opener.close()
     if returnurl:
         return page, url
