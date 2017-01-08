@@ -43,7 +43,7 @@ This will install all the python requirments to make your bot work.
 1. Checkout code
 2. Setup genmay.conf
 3. `$ virtualenv venv`
-  Or if python is defaulted to python2.x; `$ virtualenv -p /path/to/your/pythong3 venv`
+  Or if python is defaulted to python2.x; `$ virtualenv -p /path/to/your/python3 venv`
 4. `$ source venv/bin/activate`
 5. `(venv) $ pip install -r requirements.txt`
 6. `(venv) $ python genmaybot.py`
