@@ -18,7 +18,7 @@
 # test comment please ignore
 
 
-from ircbot import SingleServerIRCBot
+from irc.bot import SingleServerIRCBot
 import time
 import imp
 import sys
