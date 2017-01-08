@@ -1,0 +1,15 @@
+beautifulsoup4==4.5.3
+CherryPy==3.2.2
+inflect==0.2.5
+irc==4.0
+jaraco.classes==1.4
+jaraco.collections==1.5
+jaraco.functools==1.15.1
+jaraco.itertools==2.0
+jaraco.logging==1.5
+jaraco.stream==1.1.1
+jaraco.text==1.8
+more-itertools==2.5.0
+pytz==2016.10
+six==1.10.0
+tempora==1.6.1
