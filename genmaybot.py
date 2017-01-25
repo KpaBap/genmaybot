@@ -35,7 +35,7 @@ class TestBot(SingleServerIRCBot):
 
     def __init__(self, channel, nickname, server, port=6667):
         SingleServerIRCBot.__init__(
-            self, [(server, port)], nickname, nickname, 15)
+            self, [(server, port)], nickname, nickname)
         self.channel = channel
         self.doingcommand = False
         self.botnick = nickname
@@ -79,11 +79,11 @@ class TestBot(SingleServerIRCBot):
 
     def on_kick(self, c, e):
         # attempt to rejoin any channel we're kicked from
-        if e.arguments()[0][0:6] == c.get_nickname():
+        if e.arguments[0][0:6] == c.get_nickname():
             c.join(e.target())
 
     def on_disconnect(self, c, e):
-        print("DISCONNECT: " + str(e.arguments()))
+        print("DISCONNECT: " + str(e.arguments))
 
     def on_welcome(self, c, e):
         c.privmsg(
@@ -106,9 +106,9 @@ class TestBot(SingleServerIRCBot):
     def on_ison(self, c, e):
 
         # strip out extraneous space at the end
-        ison_reply = e.arguments()[0][:-1]
+        ison_reply = e.arguments[0][:-1]
 
-        # print ("Got ISON reply: %s" % e.arguments()[0])
+        # print ("Got ISON reply: %s" % e.arguments[0])
 
         if ison_reply == self.keepalive_nick:
             self.last_keepalive = time.time()
@@ -140,7 +140,7 @@ class TestBot(SingleServerIRCBot):
         try:
 
             self.whoisIP_reply_handler(
-                self, self.whoisIP_sourceEvent, e.arguments()[1].split()[-1], "", True)
+                self, self.whoisIP_sourceEvent, e.arguments[1].split()[-1], "", True)
         except:
             pass  # No whois host line reply handler
 
@@ -148,8 +148,8 @@ class TestBot(SingleServerIRCBot):
         self.process_line(c, e)
 
     def on_privnotice(self, c, e):
-        from_nick = e.source().split("!")[0]
-        line = e.arguments()[0].strip()
+        from_nick = e.source.split("!")[0]
+        line = e.arguments[0].strip()
 
         if from_nick == "NickServ":
             if line.find("This nickname is registered and protected.") != -1:
@@ -166,14 +166,14 @@ class TestBot(SingleServerIRCBot):
     def on_ctcp(self, c, e):
         self._on_ctcp(c, e)
 
-        if not e.arguments()[0] == "ACTION":  # ignore /me messages
-            from_nick = e.source().split("!")[0]
-            line = " ".join(e.arguments())
+        if not e.arguments[0] == "ACTION":  # ignore /me messages
+            from_nick = e.source.split("!")[0]
+            line = " ".join(e.arguments)
             self.mirror_pm(c, from_nick, line, "CTCP")
 
     def on_privmsg(self, c, e):
-        from_nick = e.source().split("!")[0]
-        line = e.arguments()[0].strip()
+        from_nick = e.source.split("!")[0]
+        line = e.arguments[0].strip()
         command = line.split(" ")[0]
 
         if command in self.admincommands and self.isbotadmin(from_nick):
@@ -197,12 +197,12 @@ class TestBot(SingleServerIRCBot):
             return
 
     def on_whoisregnick(self, c, e):
-        nick = e.arguments()[0]
+        nick = e.arguments[0]
         line = self.admincommand
         command = line.split(" ")[0]
         self.admincommand = ""
         try:
-            if e.arguments()[1].find("registered") != -1 and line != "":
+            if e.arguments[1].find("registered") != -1 and line != "":
                 say = self.admincommands[command](line, nick, self, c)
                 say = say.split("\n")
                 for line in say:
@@ -213,14 +213,14 @@ class TestBot(SingleServerIRCBot):
             print("admin exception: " + line + " : " + str(inst))
 
     def on_whoreply(self, c, e):
-        nick = e.arguments()[4]
+        nick = e.arguments[4]
 
         # The bot does a whois on itself to find its cloaked hostname after it connects
         # This if statement handles that situation and stores the data
         # accordingly
         if nick == c.get_nickname():
-            self.realname = e.arguments()[1]
-            self.hostname = e.arguments()[2]
+            self.realname = e.arguments[1]
+            self.hostname = e.arguments[2]
             # The protocol garbage before the real message is
             #:<nick>!<realname>@<hostname> PRIVMSG <target> :
             return
@@ -231,9 +231,9 @@ class TestBot(SingleServerIRCBot):
             return
         self.doingcommand = True
 
-        line = ircevent.arguments()[0]
-        from_nick = ircevent.source().split("!")[0]
-        hostmask = ircevent.source()[ircevent.source().find("!") + 1:]
+        line = ircevent.arguments[0]
+        from_nick = ircevent.source.split("!")[0]
+        hostmask = ircevent.source[ircevent.source.find("!") + 1:]
         command = line.split(" ")[0].lower()
         args = line[len(command) + 1:].strip()
 
