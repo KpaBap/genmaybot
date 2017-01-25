@@ -177,7 +177,7 @@ class TestBot(SingleServerIRCBot):
 
         if command in self.admincommands and self.isbotadmin(from_nick):
             self.admincommand = line
-            c.whois(from_nick)
+            c.whois([from_nick])
 		
         # Mirror the PM to the list of admin nicks
         self.mirror_pm(c, from_nick, line, "PM")

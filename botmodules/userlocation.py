@@ -124,9 +124,9 @@ def request_whoisIP(self, reply_handler, nick="", e=""):
 # Or if we are internally getting whois info, we don't need to know about the source event
 
     if nick:
-        self.irccontext.whois(nick)
+        self.irccontext.whois([nick])
     elif e:
-        self.irccontext.whois(e.nick)
+        self.irccontext.whois([e.nick])
     else:
         return
     self.whoisIP_reply_handler = reply_handler
