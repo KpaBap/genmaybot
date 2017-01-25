@@ -163,7 +163,7 @@ class TestBot(SingleServerIRCBot):
             self.mirror_pm(c, from_nick, line, "NOTICE")
 
     def on_ctcp(self, c, e):
-        SingleServerIRCBot.on_ctcp(self, c, e)
+        super(TestBot, self).on_ctcp(c, e)
         if not e.arguments[0] == "ACTION":  # ignore /me messages
             from_nick = e.source.split("!")[0]
             line = " ".join(e.arguments)
@@ -177,7 +177,7 @@ class TestBot(SingleServerIRCBot):
         if command in self.admincommands and self.isbotadmin(from_nick):
             self.admincommand = line
             c.whois([from_nick])
-		
+
         # Mirror the PM to the list of admin nicks
         self.mirror_pm(c, from_nick, line, "PM")
 
