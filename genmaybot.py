@@ -80,7 +80,7 @@ class TestBot(SingleServerIRCBot):
     def on_kick(self, c, e):
         # attempt to rejoin any channel we're kicked from
         if e.arguments[0][0:6] == c.get_nickname():
-            c.join(e.target())
+            c.join(e.target)
 
     def on_disconnect(self, c, e):
         print("DISCONNECT: " + str(e.arguments))
@@ -245,7 +245,7 @@ class TestBot(SingleServerIRCBot):
         if private or notice:
             linesource = from_nick
         else:
-            linesource = ircevent.target()
+            linesource = ircevent.target
 
         e = None
         etmp = []
