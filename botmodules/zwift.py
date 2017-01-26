@@ -19,6 +19,7 @@ def call_zwift(self, e):
         e.output = e.nick + ', the next map is ' + next_map + ' in ' + zwift.timedelta_to_string(time_until_next)
     else:
         e.output = e.nick + ', I have no clue, try http://whatsonzwift.com/'
+    return e
 
 call_zwift.command = "!zwift"
 
