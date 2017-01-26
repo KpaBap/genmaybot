@@ -4,11 +4,19 @@ import iso8601
 import datetime
 import string
 
+
 def call_zwift(self, e):
     zwift = Zwift()
     current_map = zwift.current_map()
-    if current_map:
+    next_map = zwift.next_map()
+    time_until_next = zwift.time_until_next()
+
+    if current_map and next_map:
+        e.output = e.nick + ', the current map is ' + current_map + '. ' + next_map + ' will start in ' + zwift.timedelta_to_string(time_until_next)
+    elif current_map:
         e.output = e.nick + ', the current map is ' + current_map
+    elif next_map:
+        e.output = e.nick + ', the next map is ' + next_map + ' in ' + zwift.timedelta_to_string(time_until_next)
     else:
         e.output = e.nick + ', I have no clue, try http://whatsonzwift.com/'
 
@@ -46,7 +54,6 @@ class Zwift:
         next_map = None
         for appointment in self.map_xml['MapSchedule']['appointments']['appointment']:
             starts_at = iso8601.parse_date(appointment['@start'])
-            starts_at = starts_at.astimezone(datetime.timezone.utc)
             if starts_at > now and (earliest_stamp is None or starts_at < earliest_stamp):
                 next_map = appointment['@map']
                 earliest_stamp = starts_at
@@ -60,11 +67,21 @@ class Zwift:
         earliest_stamp = None
         for appointment in self.map_xml['MapSchedule']['appointments']['appointment']:
             starts_at = iso8601.parse_date(appointment['@start'])
-            starts_at = starts_at.astimezone(datetime.timezone.utc)
             if starts_at > now and (earliest_stamp is None or starts_at < earliest_stamp):
                 earliest_stamp = starts_at
         if earliest_stamp:
-            diff = starts_at - now
+            diff = earliest_stamp - now
             return diff
         else:
             return None
+
+    def timedelta_to_string(self, timedelta):
+        hours = int(timedelta.seconds / 60 / 60)
+        minutes = int((timedelta.seconds / 60) - (hours * 60))
+        seconds = int(timedelta.seconds - ((hours * 60 * 60) + (minutes * 60)))
+        return '{} days {} hours {} minutes {} seconds'.format(
+            int(timedelta.days),
+            int(hours),
+            int(minutes),
+            int(seconds)
+        )
