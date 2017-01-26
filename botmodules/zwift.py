@@ -6,22 +6,53 @@ import string
 
 
 def call_zwift(self, e):
+    # Figure out map information.
     zwift = Zwift()
     current_map = zwift.current_map()
     next_map = zwift.next_map()
-    time_until_next = zwift.time_until_next()
+    next_timedelta = zwift.next_timedelta()
 
-    if current_map and next_map:
-        e.output = e.nick + ', the current map is ' + current_map + '. ' + next_map + ' will start in ' + zwift.timedelta_to_string(time_until_next)
-    elif current_map:
-        e.output = e.nick + ', the current map is ' + current_map
-    elif next_map:
-        e.output = e.nick + ', the next map is ' + next_map + ' in ' + zwift.timedelta_to_string(time_until_next)
+    # Are we asking about a specific map?
+    if e.input:
+        course = e.input.strip()
+        course_datetime = zwift.find_next_map_datetime(course)
+        if current_map.upper() == course.upper():
+            e.output = '{}, {} is running right now for another {}'.format(
+                e.nick,
+                string.capwords(current_map),
+                Zwift.timedelta_to_string(next_timedelta)
+            )
+        elif course_datetime:
+            e.output = '{}, {} is next scheduled in {}'.format(
+                e.nick,
+                string.capwords(course),
+                Zwift.timedelta_to_string(course_datetime - datetime.datetime.now(datetime.timezone.utc))
+            )
+        else:
+            e.output = '{}, the course \'{}\' has not been scheduled yet.'.format(
+                e.nick,
+                course
+            )
     else:
-        e.output = e.nick + ', I have no clue, try http://whatsonzwift.com/'
+        # Output what information we can gather.
+        if current_map and next_map:
+            e.output = '{}, the current map is {}. {} will start in {}'.format(
+                e.nick,
+                string.capwords(current_map),
+                string.capwords(next_map),
+                Zwift.timedelta_to_string(next_timedelta)
+            )
+        elif current_map:
+            e.output = '{}, the current map is {}'.format(e.nick, current_map)
+        elif next_map:
+            e.output = '{}, the next map is {} in {}'.format(e.nick, next_map,
+                                                             Zwift.timedelta_to_string(next_timedelta))
+        else:
+            e.output = '{}, I have no clue, try http://whatsonzwift.com'.format(e.nick)
     return e
 
 call_zwift.command = "!zwift"
+call_zwift.helptext = 'Current and next course: "!zwift", Next schedule for specific course: "!zwift Watopia"'
 
 
 class Zwift:
@@ -34,49 +65,61 @@ class Zwift:
         map_xml = urllib.request.urlopen('http://whatsonzwift.com/MapSchedule.xml').read().decode('utf-8')
         self.map_xml = xmltodict.parse(map_xml)
 
-    def current_map(self):
-        now = datetime.datetime.now(datetime.timezone.utc)
+    def current(self, now=datetime.datetime.now(datetime.timezone.utc)):
         latest_stamp = None
-        active_map = None
+        current_appointment = None
+        for appointment in self.map_xml['MapSchedule']['appointments']['appointment']:
+            starts_at = iso8601.parse_date(appointment['@start']).astimezone(datetime.timezone.utc)
+            if starts_at <= now and (latest_stamp is None or starts_at >= latest_stamp):
+                current_appointment = appointment
+                latest_stamp = starts_at
+        return current_appointment
+
+    def next(self, now=datetime.datetime.now(datetime.timezone.utc)):
+        earliest_stamp = None
+        next_appointment = None
         for appointment in self.map_xml['MapSchedule']['appointments']['appointment']:
             starts_at = iso8601.parse_date(appointment['@start'])
-            starts_at = starts_at.astimezone(datetime.timezone.utc)
-            if starts_at <= now and (latest_stamp is None or starts_at >= latest_stamp):
-                active_map = appointment['@map']
-                latest_stamp = starts_at
-        if active_map:
-            return string.capwords(active_map)
+            if (starts_at > now) and (earliest_stamp is None or starts_at < earliest_stamp):
+                next_appointment = appointment
+                earliest_stamp = starts_at
+        return next_appointment
+
+    def current_map(self):
+        current_appointment = self.current()
+        if current_appointment['@map']:
+            return current_appointment['@map']
         else:
             return None
 
     def next_map(self):
-        now = datetime.datetime.now(datetime.timezone.utc)
-        earliest_stamp = None
-        next_map = None
-        for appointment in self.map_xml['MapSchedule']['appointments']['appointment']:
-            starts_at = iso8601.parse_date(appointment['@start'])
-            if starts_at > now and (earliest_stamp is None or starts_at < earliest_stamp):
-                next_map = appointment['@map']
-                earliest_stamp = starts_at
-        if next_map:
-            return string.capwords(next_map)
+        next_appointment = self.next()
+        if next_appointment['@map']:
+            return next_appointment['@map']
         else:
             return None
 
-    def time_until_next(self):
-        now = datetime.datetime.now(datetime.timezone.utc)
-        earliest_stamp = None
-        for appointment in self.map_xml['MapSchedule']['appointments']['appointment']:
-            starts_at = iso8601.parse_date(appointment['@start'])
-            if starts_at > now and (earliest_stamp is None or starts_at < earliest_stamp):
-                earliest_stamp = starts_at
-        if earliest_stamp:
-            diff = earliest_stamp - now
-            return diff
+    def next_timedelta(self):
+        next_appointment = self.next()
+        if next_appointment:
+            now = datetime.datetime.now(datetime.timezone.utc)
+            return iso8601.parse_date(next_appointment['@start']) - now
         else:
             return None
 
-    def timedelta_to_string(self, timedelta):
+    def find_next_map_datetime(self, course, now=datetime.datetime.now(datetime.timezone.utc)):
+        course = course.upper()
+        earliest_stamp = None
+        next_starts_at = None
+        for appointment in self.map_xml['MapSchedule']['appointments']['appointment']:
+            starts_at = iso8601.parse_date(appointment['@start'])
+            if starts_at > now and (earliest_stamp is None or starts_at < earliest_stamp) and appointment['@map'] == course:
+                next_starts_at = starts_at
+                earliest_stamp = starts_at
+        return next_starts_at
+
+    @staticmethod
+    def timedelta_to_string(timedelta):
         hours = int(timedelta.seconds / 60 / 60)
         minutes = int((timedelta.seconds / 60) - (hours * 60))
         seconds = int(timedelta.seconds - ((hours * 60 * 60) + (minutes * 60)))
