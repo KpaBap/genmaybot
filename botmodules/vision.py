@@ -3,7 +3,7 @@ import re
 import json
 import urllib
 
-from url import last_link
+from botmodules.url import last_link
 
 def set_msvisionkey(line, nick, self, c):
   self.botconfig["APIkeys"]["msvisionkey"] = line[11:]
