@@ -18,7 +18,7 @@
 # test comment please ignore
 
 
-from irc.bot import SingleServerIRCBot
+import irc
 import time
 import imp
 import sys
@@ -28,13 +28,15 @@ import configparser
 import threading
 import traceback
 
+# We need this in order to catch whois reply from a registered nick.
+irc.events.numeric["307"] = "whoisregnick"
 socket.setdefaulttimeout(5)
 
 
-class TestBot(SingleServerIRCBot):
+class TestBot(irc.bot.SingleServerIRCBot):
 
     def __init__(self, channel, nickname, server, port=6667):
-        SingleServerIRCBot.__init__(
+        irc.bot.SingleServerIRCBot.__init__(
             self, [(server, port)], nickname, nickname)
         self.channel = channel
         self.doingcommand = False
@@ -220,9 +222,8 @@ class TestBot(SingleServerIRCBot):
             self.realname = e.arguments[1]
             self.hostname = e.arguments[2]
             # The protocol garbage before the real message is
-            #:<nick>!<realname>@<hostname> PRIVMSG <target> :
+            # :<nick>!<realname>@<hostname> PRIVMSG <target> :
             return
-
 
     def process_line(self, c, ircevent, private=False):
         if self.doingcommand:
