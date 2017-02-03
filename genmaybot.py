@@ -193,7 +193,7 @@ class TestBot(SingleServerIRCBot):
 
         try:
             for nick in self.pm_monitor_nicks:
-                context.privmsg(nick, output)
+                self.split_privmsg(context, nick, output)
         except:
             return
 
@@ -207,7 +207,7 @@ class TestBot(SingleServerIRCBot):
                 say = self.admincommands[command](line, nick, self, c)
                 say = say.split("\n")
                 for line in say:
-                    c.privmsg(nick, line)
+                    self.split_privmsg(c, nick, line)
 
         except Exception as inst:
             traceback.print_exc()
@@ -288,6 +288,11 @@ class TestBot(SingleServerIRCBot):
 
         self.doingcommand = False
         return
+
+    def split_privmsg(self, client, nick, output):
+        output_max_length = 510 - len("PRIVMSG %s :" % nick)
+        for line in textwrap.wrap(output, output_max_length):
+            client.privmsg(nick, line)
 
     def botSay(self, botevent):
         try:
@@ -442,7 +447,7 @@ class TestBot(SingleServerIRCBot):
                     if say:
                         for channel in self.channels:
                             if channel != '#bopgun' and channel != '#fsw':
-                                context.privmsg(channel, say)
+                                self.split_privmsg(context, channel, say)
         except Exception as inst:
             print("alerts: " + str(inst))
             pass
