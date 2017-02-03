@@ -17,7 +17,7 @@
 # random descision maker?
 # test comment please ignore
 
-
+from irc.bot import SingleServerIRCBot
 import irc
 import time
 import imp
@@ -27,16 +27,17 @@ import socket
 import configparser
 import threading
 import traceback
+import textwrap
 
 # We need this in order to catch whois reply from a registered nick.
 irc.events.numeric["307"] = "whoisregnick"
 socket.setdefaulttimeout(5)
 
 
-class TestBot(irc.bot.SingleServerIRCBot):
+class TestBot(SingleServerIRCBot):
 
     def __init__(self, channel, nickname, server, port=6667):
-        irc.bot.SingleServerIRCBot.__init__(
+        SingleServerIRCBot.__init__(
             self, [(server, port)], nickname, nickname)
         self.channel = channel
         self.doingcommand = False
