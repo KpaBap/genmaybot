@@ -2,7 +2,7 @@ import sqlite3, locale, urllib.request, urllib.error, urllib.parse
 try:
     locale.setlocale(locale.LC_ALL, 'English_United States')
 except:
-    locale.setlocale(locale.LC_ALL, 'en_US.utf8')
+    locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
 
 def portfolio(self, e):
 	
