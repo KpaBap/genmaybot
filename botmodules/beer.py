@@ -78,8 +78,11 @@ def advocate_beer(self, e):
     #get the name, rating and style of a beer from beeradvocate.com
     url = self.tools['google_url']("site:beeradvocate.com " + query, "/beer/profile/[0-9]*?/[0-9]+")
     #url = "http://beeradvocate.com/beer/profile/306/1212/"
-
-    beerpage = self.tools["load_html_from_URL"](url)
+    try:
+        beerpage = self.tools["load_html_from_URL"](url)
+    except:
+        self.logger.exception("Function advocate_beer Exception:")
+        return
 
     beertitle = beerpage.head.title.string
     beertitle = beertitle[0:beertitle.find("|") - 1]

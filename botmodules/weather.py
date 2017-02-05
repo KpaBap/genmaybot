@@ -31,7 +31,7 @@ def google_geocode(self, address):
         request = urllib.request.Request(url, None, {'Referer': 'http://irc.00id.net'})
         response = urllib.request.urlopen(request)
     except urllib.error.HTTPError as err:
-        print(err.read())
+        self.logger.exception("Exception in google_geocode:")
 
     try:
         results_json = json.loads(response.read().decode('utf-8'))
@@ -78,8 +78,8 @@ def google_geocode(self, address):
 
         
     except:
-        print("Failed to geocode location using Google API.")
-        print("Geocode URL: %s" % url)
+        self.logger.exception("Failed to geocode location using Google API:")
+
         return
     
     return formatted_address, lat, lng, country
@@ -142,7 +142,7 @@ Use \002!setlocation <location>\002 to save your location"""
    
 def forecast_io(self,e, location=""):
     apikey = self.botconfig["APIkeys"]["forecastIO_APIkey"]
-    print ("Entered Forecast.IO function. Location %s or %s" % (location, e.input))
+    self.logger.debug("Entered Forecast.IO function. Location {} or {}".format(location, e.input))
     if location == "":
         location = e.input
     if location == "" and user:
@@ -157,12 +157,13 @@ def forecast_io(self,e, location=""):
         request = urllib.request.Request(url, None, {'Referer': 'http://irc.00id.net'})
         response = urllib.request.urlopen(request)
     except urllib.error.HTTPError as err:
-        print(err.read())
+        self.logger.exception("Exception in forecast_io:")
 
     #try:
     results_json = json.loads(response.read().decode('utf-8'))
     timezone_offset = results_json['offset']    
     current_conditions = results_json['currently']
+
 
     temp = current_conditions['temperature']
     humidity = int(100*current_conditions['humidity'])

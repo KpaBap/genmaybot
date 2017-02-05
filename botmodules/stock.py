@@ -6,7 +6,8 @@ import urllib.request, urllib.error, urllib.parse, csv, json# ,locale
 
 def get_stock_quote(self, e):
     # stock quotes from Yahoo Finance
-    
+    if not e.input:
+        return
       
     opener = urllib.request.build_opener()
     opener.addheaders = [('User-Agent',"Opera/9.10 (YourMom 8.0)")]

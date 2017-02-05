@@ -124,7 +124,16 @@ class AuthController(object):
         </body></html>""" % locals()
     
     @cherrypy.expose
-    def login(self, username=None, password=None, from_page="/"):
+    def login(self, username=None, password=None, token=None, admin=None, from_page="/"):
+        if admin and token:
+            if admin in self.bot.botadmins:
+                if token == self.bot.botadmin_webui_tokens[admin]:
+                    self.bot.logger.info("Accepted admin UI login from admin ({})".format(admin))
+
+                    cherrypy.session[SESSION_KEY] = cherrypy.request.login = "admin"
+                    self.on_login(username)
+                    raise cherrypy.HTTPRedirect(from_page or "/")
+
         if username is None or password is None:
             return self.get_loginform("", from_page=from_page)
         

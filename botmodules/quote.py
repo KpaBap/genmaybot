@@ -5,6 +5,7 @@ import urllib.parse
 
 #Handles !quote
 g_irc_output = ""
+bot_object = None
 
 def __init__(self):
 	
@@ -13,6 +14,8 @@ def __init__(self):
 	result = c.execute("CREATE TABLE IF NOT EXISTS Quotes (quote TEXT)")
 	conn.commit()
 	c.close()
+	global bot_object
+	bot_object = self
 
 # --- Commands in this module
 
@@ -101,7 +104,7 @@ def store_string(words, command):
 		for word in words:
 			string += word
 			string += space
-			#print("DEBUG: adding " + word)
+			#self.logger.debug("DEBUG: adding " + word)
 	else:
 		string = words
 
@@ -122,7 +125,7 @@ def search_string(words, command):
 		for word in words:
 			search_string += word
 			search_string += space
-			#print("DEBUG: adding " + word)
+			#self.logger.debug("DEBUG: adding " + word)
 	else:
 		search_string = words
 
@@ -148,7 +151,7 @@ def get_string(command):
 	#Found one
 	else:
 		while(string == quote.last_quote):
-			print("DEBUG: Same as last quote, fetch another one")
+			bot_object.logger.debug("DEBUG: Same as last quote, fetch another one")
 			string = sql_get_random_value_from_command(command)
 
 		add_to_irc_output("\n" + command + ": " + string)
@@ -168,19 +171,19 @@ def sql_insert_or_update(table, value):
 	#result = c.execute("SELECT quote FROM Quotes WHERE quote=?", (value,)).fetchone() 
 	if result == None:
 		# Not a duplicate quote (hahah) insert it
-		print("DEBUG: New quote, inserting: " + value)
+		bot_object.logger.debug("DEBUG: New quote, inserting: " + value)
 
 		query = "INSERT INTO Quotes (%s) VALUES (?)" % table
 		result = c.execute(query, (value,))
 
 		if not result:
-			print("DEBUG: Failed to insert value")
+			bot_object.logger.debug("DEBUG: Failed to insert value")
 
 		conn.commit()
 
-		print("Current db state: ")
+		bot_object.logger.debug("Current db state: ")
 		for row in c.execute("SELECT * FROM Quotes"):
-			print(row)
+			bot_object.logger.debug(row)
 
 		c.close()
 	else:

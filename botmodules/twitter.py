@@ -18,9 +18,9 @@ def __init__(self):
     response = urllib.request.urlopen(req)
     response = json.loads(response.read().decode('utf-8'))
     read_timeline.holyshitbearstoken = response['access_token']
-    print(read_timeline.holyshitbearstoken)
+    self.logger.debug(read_timeline.holyshitbearstoken)
   except Exception as inst:
-      print(inst)
+      self.logger.debug(inst)
 
 def read_timeline (user):
     url = "https://api.twitter.com/1.1/statuses/user_timeline.json?screen_name=%s&count=1" % user
@@ -57,7 +57,7 @@ def breaking_alert():
             breaking_alert.lastcheck = updated
             return description
       except Exception as inst:
-          print("breakinglert: " + str(inst))
+          self.logger.debug("breakinglert: " + str(inst))
           pass
 breaking_alert.lastcheck = ""
 breaking_alert.alert = False

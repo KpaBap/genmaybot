@@ -87,7 +87,7 @@ def mlb_schedule(self, e):
             elif (isCareAbout(game.attrib['home_name_abbrev']) or isCareAbout(game.attrib['away_name_abbrev'])):
                 game_details.append(game.attrib['away_name_abbrev'] + ' at ' + game.attrib['home_name_abbrev'] + ' ' + game.attrib['home_time'] + ' ' + game.attrib['ampm'] + ' ' + game.attrib['home_time_zone'])
 
-    # print(game_details)
+    # self.logger.debug(game_details)
     e.output = ' | '.join(game_details)
 
     return e

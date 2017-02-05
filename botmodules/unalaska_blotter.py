@@ -13,7 +13,7 @@ def get_unalaska_blotter(self, e):
         blotdate = firstBlot.findAll('span', attrs={'class': 'date'})[0].string
         details = firstBlot.findAll('span', attrs={'class': 'details'})[0].string
     except:
-        print("\nSomething went wrong with processing the blotter page in unalaska_blotter.py\n")
+        self.logger.debug("\nSomething went wrong with processing the blotter page in unalaska_blotter.py\n")
         pass
 
     #Convert date to a bit shorter format

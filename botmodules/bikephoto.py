@@ -125,7 +125,7 @@ def store_string_for_nick(nick, words, command):
 		for word in words:
 			string += word
 			string += space
-			#print("DEBUG: adding " + word)
+			#self.logger.debug("DEBUG: adding " + word)
 	else:
 		string = words
 
@@ -156,26 +156,26 @@ def sql_insert_or_update(nick, command, string):
 	#New user
 	result = c.execute("SELECT nick FROM bikePhoto WHERE nick=?", (nick,)).fetchone() 
 	if result == None:
-		print("DEBUG: New nick, inserting " + command + " value: " + string)
+		self.logger.debug("DEBUG: New nick, inserting " + command + " value: " + string)
 
 		query = "INSERT INTO bikePhoto (nick,%s) VALUES (?,?)" % command
 		result = c.execute(query, (nick, string,))
 		if not result:
-			print("DEBUG: Failed to insert value")
+			self.logger.debug("DEBUG: Failed to insert value")
 
 	#Existing user
 	else:
-		print("DEBUG: Existing nick, inserting " + command + " value: " + string)
+		self.logger.debug("DEBUG: Existing nick, inserting " + command + " value: " + string)
 		query = "UPDATE bikePhoto set %s = ? WHERE nick=?" % command
 		result = c.execute(query, (string, nick,))
 		if not result:
-			print("DEBUG: Failed to update value")
+			self.logger.debug("DEBUG: Failed to update value")
 
 	conn.commit()
 
-	print("Current db state: ")
+	self.logger.debug("Current db state: ")
 	for row in c.execute("SELECT * FROM bikePhoto"):
-		print(row)
+		self.logger.debug(row)
 
 	c.close()
 	return 1
@@ -217,7 +217,7 @@ def debug():
 	event = debug_event()
 	__init__(self)
 
-	print("Command:")
+	self.logger.debug("Command:")
 	command = input()
 	print ("Args:")
 	args = input()
@@ -232,6 +232,6 @@ def debug():
 		if word == "!photo":
 			photo(self, event)
 
-	print("All done, output is: " + event.output)
+	self.logger.debug("All done, output is: " + event.output)
 
 #debug()

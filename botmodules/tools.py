@@ -4,25 +4,27 @@ from bs4 import BeautifulSoup
 import encodings.idna
 import datetime
 
+bot_object = None
 
 def __init__(self):
-    google_url.self = self
+    global bot_object
+    bot_object = self
 
 
 def set_googleapi(line, nick, self, c):
-    google_url.self.botconfig["APIkeys"]["gsearchapi"] = line[11:]
+    bot_object.botconfig["APIkeys"]["gsearchapi"] = line[11:]
     with open('genmaybot.cfg', 'w') as configfile:
         self.botconfig.write(configfile)
 set_googleapi.admincommand = "gsearchapi"
 
 def set_googlecx(line, nick, self, c):
-    google_url.self.botconfig["APIkeys"]["gsearchcx"] = line[10:]
+    bot_object.botconfig["APIkeys"]["gsearchcx"] = line[10:]
     with open('genmaybot.cfg', 'w') as configfile:
         self.botconfig.write(configfile)
 set_googlecx.admincommand = "gsearchcx"
 
 def set_shorturlkey(line, nick, self, c):
-    google_url.self.botconfig["APIkeys"]["shorturlkey"] = line[12:]
+    bot_object.botconfig["APIkeys"]["shorturlkey"] = line[12:]
     with open('genmaybot.cfg', 'w') as configfile:
         self.botconfig.write(configfile)
 set_shorturlkey.admincommand = "shorturlkey"
@@ -60,29 +62,30 @@ def remove_html_tags(data):
 
 
 def google_url(searchterm, regexstring):
+
     searchterm = urllib.parse.quote(searchterm)
-    key = google_url.self.botconfig["APIkeys"]["gsearchapi"]
-    cx = google_url.self.botconfig["APIkeys"]["gsearchcx"]
+    key = bot_object.botconfig["APIkeys"]["gsearchapi"]
+    cx = bot_object.botconfig["APIkeys"]["gsearchcx"]
     url = 'https://www.googleapis.com/customsearch/v1?key={}&cx={}&q={}'
     url = url.format(key, cx, searchterm)
     
     try:
         request = urllib.request.Request(url, None, {'Referer': 'http://irc.00id.net'})
         response = urllib.request.urlopen(request)
-    except urllib.error.HTTPError as err:
-        print(err.read())
+    except urllib.error.HTTPError:
+        bot_object.logger.exception("Exception in google_url:")
 
     results_json = json.loads(response.read().decode('utf-8'))
     results = results_json['items']
 
     for result in results:
-        print(result['link'])
+        bot_object.logger.debug("Got URL from Google: {}".format(result['link']))
         m = re.search(regexstring, result['link'])
-        print(m)
         if (m):
             url = result['link']
             url = url.replace('%25', '%')
             return url
+        bot_object.logger.debug("Google URL regex did not match: ({})".format(regexstring))
     return
 
 
@@ -109,8 +112,8 @@ def load_html_from_URL(url, readlength="", returnurl=False):
 
 def shorten_url(url):
     #goo.gl url shortening service, not used directly but used by some commands
-  try:
-    key = google_url.self.botconfig["APIkeys"]["shorturlkey"]
+
+    key = bot_object.botconfig["APIkeys"]["shorturlkey"]
     values = json.dumps({'longUrl': url})
     headers = {'Content-Type': 'application/json'}
     requestUrl = "https://www.googleapis.com/urlshortener/v1/url?key={}".format(key)
@@ -119,9 +122,6 @@ def shorten_url(url):
     results = json.loads(response.read().decode('utf-8'))
     shorturl = results['id']
     return shorturl
-  except:
-    traceback.print_exc()
-    return ""
 
 
 def fixurl(url):

@@ -24,7 +24,6 @@ password=change-me-or-someone-will-steal-your-config
 port=8080
 
 [misc]
-#log files for saving stdout and stderr
-error_log=error_log
-event_log=event_log
+debug_log=debug.log
+event_log=event.log
 

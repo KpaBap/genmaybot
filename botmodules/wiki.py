@@ -102,7 +102,7 @@ def get_wiki_file_description(self, url):
                     desc = page.find("div", attrs={"id": "shared-image-desc"}).next.getText(separator=" ")
                     #print "hit 4th case"
                 except:
-                    print("Couldn't find description for file %s" % url)
+                    self.logger.debug("Couldn't find description for file %s" % url)
                     return
 
     desc = desc.replace("English:", "")

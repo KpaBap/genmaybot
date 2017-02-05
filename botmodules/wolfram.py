@@ -33,7 +33,7 @@ def get_wolfram(self, e):
             return get_wolfram(self, e)
         except Exception as inst:
             traceback.print_exc()
-            print("!wolframrelated " + e.input + " : " + str(inst))
+            self.logger.debug("!wolframrelated " + e.input + " : " + str(inst))
             result = self.bangcommands["!error"](self, e).output
             e.output = result
             return e
@@ -60,7 +60,7 @@ def get_wolfram(self, e):
             return e
         except Exception as inst:
             traceback.print_exc()
-            print("!wolfram " + e.input + " : " + str(inst))
+            self.logger.debug("!wolfram " + e.input + " : " + str(inst))
             result = self.bangcommands["!error"](self, e).output
             e.output = result
             return e

@@ -42,7 +42,7 @@ def image_vision(self, e):
       return e
     
     values = json.dumps({"url": url})
-    print(values)
+    self.logger.debug(values)
     requestUrl = "https://api.projectoxford.ai/vision/v1.0/analyze?visualFeatures=Description,Adult"
     headers = {'Ocp-Apim-Subscription-Key' : key,
                'Content-Type': 'application/json'}
@@ -50,7 +50,7 @@ def image_vision(self, e):
     response = urllib.request.urlopen(req)
     results = json.loads(response.read().decode('utf-8'))
 
-    print(results)
+    self.logger.debug(results)
 
     caption = results["description"]["captions"][0]["text"]
     capconfidence = int(results["description"]["captions"][0]["confidence"] * 100)

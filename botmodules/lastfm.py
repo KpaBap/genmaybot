@@ -23,16 +23,23 @@ Sets your last.fm username so you can use the !np and !compare commands without 
 def nowplaying(self, e):
     conn = sqlite3.connect('lastfm.sqlite')
     c = conn.cursor()
-    if e.input:
-        lastfmuser = c.execute("SELECT lastfmuser FROM lastfm WHERE user = LOWER(?)", [e.input]).fetchone()
-        if not lastfmuser:
-            lastfmuser = [e.input]
-    else:
-        lastfmuser = c.execute("SELECT lastfmuser FROM lastfm WHERE user = LOWER(?)", [e.nick]).fetchone()
+    try:
+        if e.input:
+            lastfmuser = c.execute("SELECT lastfmuser FROM lastfm WHERE user = LOWER(?)", [e.input]).fetchone()
+            if not lastfmuser:
+                lastfmuser = [e.input]
+        else:
+            lastfmuser = c.execute("SELECT lastfmuser FROM lastfm WHERE user = LOWER(?)", [e.nick]).fetchone()
+    except sqlite3.OperationalError:
+        self.logger.info("Defaulting last.fm username to nickname for {} and retrying.".format(e.nick))
+        e.input = e.nick
+        setlastfmuser(self, e)
+        return nowplaying(self,e)
 
     if lastfmuser:
         lastfmuser = lastfmuser[0]
         url = "http://ws.audioscrobbler.com/2.0/?api_key=%s&limit=1&format=json&method=user.getRecentTracks&user=%s" % (self.botconfig["APIkeys"]["lastfmAPIkey"], lastfmuser)
+        print ("Getting lastfm url: {}".format(url))
         response = urllib.request.urlopen(url).read().decode('utf-8')
         track = json.loads(response)
         try:
@@ -101,7 +108,7 @@ def get_trackinfo(apikey, artist, trackname, userid):
     url = "http://ws.audioscrobbler.com/2.0/?api_key=%s&format=json&method=track.getInfo&artist=%s&track=%s&username=%s" % (apikey, artist, trackname, userid)
     response = urllib.request.urlopen(url).read().decode('utf-8')
     track = json.loads(response)
-#    print(track)
+#    self.logger.debug(track)
     return track['track']
 
 def compare(self, e):

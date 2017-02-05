@@ -3,6 +3,7 @@ import threading
 import traceback
 from inspect import isfunction
 from botmodules.web_auth import AuthController, require, member_of, name_is
+import time
 
 class RestrictedArea:
 
@@ -48,7 +49,7 @@ class Root:
         <a href="/commands" target="output">Commands</a>&nbsp;&nbsp;&nbsp;
         <a href="/botconfig" target="output">Bot Config</a>&nbsp;&nbsp;&nbsp;
         <a href="/event_log" target="output">Event log</a>&nbsp;&nbsp;&nbsp;
-        <a href="/error_log" target="output">Error log</a>&nbsp;&nbsp;&nbsp;
+        <a href="/debug_log" target="output">Debug log</a>&nbsp;&nbsp;&nbsp;
         <a href="/bot_obj" target="output">Bot Object</a>&nbsp;&nbsp;&nbsp;
        <br><br>
        <iframe name="output" width="1280px" height="1024px"></iframe>
@@ -95,8 +96,8 @@ class Root:
 
     @cherrypy.expose
     @require()
-    def error_log(self):
-        return "<pre>"+open(self.bot.botconfig['misc']['error_log'],"r").read()+"</pre>"
+    def debug_log(self):
+        return "<pre>"+open(self.bot.botconfig['misc']['debug_log'],"r").read()+"</pre>"
 
 
     @cherrypy.expose

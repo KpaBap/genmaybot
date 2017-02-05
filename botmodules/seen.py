@@ -37,7 +37,7 @@ def seenlineparser(self, e):
         result = c.execute("SELECT nick FROM seen").fetchall()
         for nick in result:
             if nick[0].lower() in e.input.lower() and "!whopaged" not in e.input.lower():
-                #print(nick[0])
+                #self.logger.debug(nick[0])
                 c.execute("INSERT INTO mentions (mentioned, mentioner, line, channel) "
                           "VALUES (?,?,?,?)", (nick[0], e.nick, e.input, e.source))
 

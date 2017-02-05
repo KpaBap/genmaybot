@@ -275,7 +275,7 @@ def strava_line_parser(self, e):
         if url_parts[1] == 'www.strava.com' or url_parts[1] == 'app.strava.com':
             ride = re.match(r"^/activities/(\d+)", url_parts[2])
             if ride and ride.group(1):
-                recent_ride = strava_get_ride_extended_info(ride.group(1))
+                recent_ride = strava_get_ride_extended_info(self, ride.group(1))
                 if recent_ride:
                     e.output = strava_ride_to_string(recent_ride)
                 else:
@@ -344,7 +344,7 @@ def strava(self, e):
             if strava_is_valid_user(e.input):
                 # Process a last ride request for a specific strava id.
                 rides_response = request_json("https://www.strava.com/api/v3/athletes/%s/activities" % e.input)
-                e.output = strava_extract_latest_ride(rides_response, e, e.input)
+                e.output = strava_extract_latest_ride(self, rides_response, e, e.input)
             else:
                 e.output = "Sorry, that is not a valid Strava user."
         except urllib.error.URLError:
@@ -364,7 +364,7 @@ def strava(self, e):
                 if strava_is_valid_user(athlete_id):
                     # Process a last ride request for a specific strava id.
                     rides_response = request_json("https://www.strava.com/api/v3/athletes/%s/activities" % athlete_id)
-                    e.output = strava_extract_latest_ride(rides_response, e, athlete_id)
+                    e.output = strava_extract_latest_ride(self, rides_response, e, athlete_id)
                 else:
                     e.output = "Sorry, that is not a valid Strava user."
             except urllib.error.URLError:
@@ -378,7 +378,7 @@ def strava(self, e):
             if strava_is_valid_user(strava_id):
                 # Process the last ride for the current strava id.
                 rides_response = request_json("https://www.strava.com/api/v3/athletes/%s/activities" % strava_id)
-                e.output = strava_extract_latest_ride(rides_response, e, strava_id)
+                e.output = strava_extract_latest_ride(self, rides_response, e, strava_id)
             else:
                 e.output = "Sorry, that is not a valid Strava user."
         except urllib.error.URLError:
@@ -416,7 +416,7 @@ def strava_achievements(self, e):
         request_json.token = self.botconfig["APIkeys"]["stravaToken"]
 
     if e.input.isdigit():
-        ride_info = strava_get_ride_extended_info(e.input)
+        ride_info = strava_get_ride_extended_info(self, e.input)
         if ride_info:
             achievements = strava_get_ride_achievements(e.input)
             if achievements:
@@ -593,7 +593,7 @@ def strava_command_handler(self, e):
 
         try:
             function = arg_function_dict[words[arg_offset]]
-            print(
+            self.logger.debug(
             "Calling " + function.__name__ + " with e.input of: " + ''.join('none' if e.input is None else e.input))
             function(self, e)
             return e
@@ -603,7 +603,7 @@ def strava_command_handler(self, e):
     # There are no args or only unknown args. We fall through from the exception above
     # EX: "" or "beardedw1zard"
     function = arg_function_dict['get']
-    print("Calling " + function.__name__ + " with e.input of: " + ''.join('none' if e.input is None else e.input))
+    self.logger.debug("Calling " + function.__name__ + " with e.input of: " + ''.join('none' if e.input is None else e.input))
     function(self, e)
 
     return e
@@ -622,19 +622,18 @@ def is_known_arg(args, known_args):
 
 def clean_arg_from_input(string):
     if (len(string.split()) > 1):
-        print("returning: " + ' '.join(string.split()[1:]))
         return ' '.join(string.split()[1:])
     return
 
 
 # ==== end beardedwizard
 
-def strava_extract_latest_ride(response, e, athlete_id=None):
+def strava_extract_latest_ride(self, response, e, athlete_id=None):
     """ Grab the latest ride from a list of rides and gather some statistics about it """
 
     if response:
         recent_ride = response[0]
-        recent_ride = strava_get_ride_extended_info(recent_ride['id'])
+        recent_ride = strava_get_ride_extended_info(self, recent_ride['id'])
         if recent_ride:
             return strava_ride_to_string(recent_ride, athlete_id, dvq=(e.nick == "dvq" or e.input == "dvq"))
         else:
@@ -645,11 +644,11 @@ def strava_extract_latest_ride(response, e, athlete_id=None):
         e.nick)
 
 
-def strava_extract_latest_epon_ride(response, e, athlete_id=None):
+def strava_extract_latest_epon_ride(self, response, e, athlete_id=None):
     """ Grab the latest ride from a list of rides and gather some statistics about it """
     if response:
         recent_ride = response[0]
-        recent_ride = strava_get_ride_extended_info(recent_ride['id'])
+        recent_ride = strava_get_ride_extended_info(self, recent_ride['id'])
         if recent_ride:
             return strava_ride_to_epon(recent_ride, athlete_id)
         else:
@@ -741,11 +740,11 @@ def strava_get_measurement_pref(athlete_id):
         return None
 
 
-def strava_get_ride_extended_info(ride_id):
+def strava_get_ride_extended_info(self, ride_id):
     """ Get all the details about a ride. """
     try:
         ride_details = request_json("https://www.strava.com/api/v3/activities/%s" % ride_id)
-        print(ride_details)
+        self.logger.debug("Strava ride details JSON: ({})".format(ride_details))
         if ride_details:
             return ride_details
         else:
@@ -787,7 +786,7 @@ def strava_get_ride_achievements(ride_id):
         return False
 
 
-def strava_get_ride_distance_since_date(athlete_id, begin_date, offset_count=0):
+def strava_get_ride_distance_since_date(self, athlete_id, begin_date, offset_count=0):
     """ Recursively aggregate all of the ride mileage since the begin_date by using strava's pagination """
     try:
         ride_distance_sum = 0
@@ -796,10 +795,10 @@ def strava_get_ride_distance_since_date(athlete_id, begin_date, offset_count=0):
         rides_details = json.loads(response.read().decode('utf-8'))
         if 'rides' in rides_details:
             for ride in rides_details['rides']:
-                ride_details = strava_get_ride_extended_info(ride['id'])
+                ride_details = strava_get_ride_extended_info(self, ride['id'])
                 if 'distance' in ride_details:
                     ride_distance_sum = ride_distance_sum + strava_convert_meters_to_miles(ride_details['distance'])
-            ride_distance_sum = ride_distance_sum + strava_get_ride_distance_since_date(athlete_id, begin_date,
+            ride_distance_sum = ride_distance_sum + strava_get_ride_distance_since_date(self, athlete_id, begin_date,
                                                                                         offset_count + 50)
         else:
             return ride_distance_sum

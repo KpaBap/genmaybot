@@ -11,7 +11,7 @@ def ytinfo(self, e, urlposted=False):
         yt = re.search("(v=|/)([\w-]+)(&.+|#t=.+|\?t=.+)?$", yt).group(2)
     else:
         yt = self.tools['google_url']('site:youtube.com {}'.format(e.input), 'watch\?v=')
-        print(yt)
+        self.logger.debug(yt)
         yt = yt[yt.find("?v=") + 3:]
 
     url = "https://www.googleapis.com/youtube/v3/videos?part=snippet%2C+contentDetails%2C+statistics&hl=en&id={}&key={}"
@@ -26,9 +26,9 @@ def ytinfo(self, e, urlposted=False):
 
     try:
         likes = int(ytjson['statistics']['likeCount'])
-        print(likes)
+        self.logger.debug(likes)
         dislikes = int(ytjson['statistics']['dislikeCount'])
-        print(dislikes)
+        self.logger.debug(dislikes)
         rating = "{0:.1f}/10".format((likes / (likes + dislikes)) * 10)
     except:
         rating = "NA"

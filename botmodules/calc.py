@@ -9,23 +9,20 @@ def google_convert(self, e):
         term = term.replace("ANS", google_convert.lastresult[nick])
     url = "http://www.google.com/ig/calculator?q=%s" % urllib.parse.quote(term)
     result = ""
-    try:
-        response = urllib.request.urlopen(url).read()
-        response = response.decode('unicode-escape')
-        response = response.replace("\xa0",",")
-        response = re.sub("([a-z]+):", '"\\1" :', response)
-        response = response.replace("<sup>","^(")
-        response = response.replace("</sup>",")")
-        response = response.replace("&#215;","x")
-        response = json.loads(response)
-        if not response['error']:
-            result = "%s = %s" % (response['lhs'],response['rhs'])
-            google_convert.lastresult[nick] = str(response['rhs'])
-            e.output = result
-    except Exception as inst: 
-        traceback.print_exc()
-        print("!c " + term + " : " + str(inst))
-        e = None
+
+    response = urllib.request.urlopen(url).read()
+    response = response.decode('unicode-escape')
+    response = response.replace("\xa0",",")
+    response = re.sub("([a-z]+):", '"\\1" :', response)
+    response = response.replace("<sup>","^(")
+    response = response.replace("</sup>",")")
+    response = response.replace("&#215;","x")
+    response = json.loads(response)
+    if not response['error']:
+        result = "%s = %s" % (response['lhs'],response['rhs'])
+        google_convert.lastresult[nick] = str(response['rhs'])
+        e.output = result
+
     
     return e
 #google_convert.command = "!c"

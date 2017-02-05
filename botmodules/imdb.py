@@ -30,18 +30,16 @@ def get_imdb(self, e, urlposted=False):
                 rating = page.find("span", itemprop="ratingValue").text
                 rating = " - Rating: " + rating.replace("\n", "")  # remove newlines since BS4 adds them in there
 
-            try:
 
-                summary = str(page.find("div", {"class":"summary_text"}, itemprop="description"))
+            summary = str(page.find("div", {"class":"summary_text"}, itemprop="description"))
 
-                summary = re.sub(r'\<a.*\/a\>', '', summary)
-                summary = self.tools['remove_html_tags'](summary)
-                summary = summary.replace('&raquo;', "")
-                summary = summary.replace("\n", "")
-                summary = summary.strip()
-                summary = " - " + summary
-            except:
-                print ("Unexpected error:", sys.exc_info()[0])
+            summary = re.sub(r'\<a.*\/a\>', '', summary)
+            summary = self.tools['remove_html_tags'](summary)
+            summary = summary.replace('&raquo;', "")
+            summary = summary.replace("\n", "")
+            summary = summary.strip()
+            summary = " - " + summary
+
 
 
         title = movietitle + rating + summary

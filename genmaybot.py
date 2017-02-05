@@ -20,7 +20,7 @@
 from irc.bot import SingleServerIRCBot
 import irc
 import time
-import imp
+import importlib
 import sys
 import os
 import socket
@@ -28,6 +28,7 @@ import configparser
 import threading
 import traceback
 import textwrap
+import logging, logging.handlers
 
 # We need this in order to catch whois reply from a registered nick.
 irc.events.numeric["307"] = "whoisregnick"
@@ -41,7 +42,10 @@ class TestBot(SingleServerIRCBot):
             self, [(server, port)], nickname, nickname)
         self.channel = channel
         self.doingcommand = False
+
         self.botnick = nickname
+        self.logger = logging.getLogger(self.botnick)
+        self.logger.info("Connecting with nickname ({}) to server {}:{}".format(self.botnick, server, port))
 
         self.commandaccesslist = {}
         self.commandcooldownlast = {}
@@ -49,9 +53,11 @@ class TestBot(SingleServerIRCBot):
         self.spam = {}
 
         self.load_config()
-        print(self.loadmodules())
+        self.logger.info(self.loadmodules())
 
+        self.admincommand = None
         self.keepalive_nick = "OperServ"
+
         self.alive = True
 
     def load_config(self):
@@ -59,20 +65,26 @@ class TestBot(SingleServerIRCBot):
         try:
             cfgfile = open('genmaybot.cfg')
         except IOError:
-            print("You need to create a .cfg file using the example")
+            logging.exception("You need to create a .cfg file using the example")
             sys.exit(1)
 
-        config.readfp(cfgfile)
+        config.read_file(cfgfile)
         self.botconfig = config
         self.botadmins = config["irc"]["botadmins"].split(",")
-        self.error_log = simpleLogger(config['misc']['error_log'])
-        self.event_log = simpleLogger(config['misc']['event_log'])
+        self.botadmin_webui_tokens = {}
+        # Tokens for the web UI
+        for admin in self.botadmins:
+            self.botadmin_webui_tokens[admin] = None
+
+        self.logger.info("Bot admins: {}".format(self.botadmins))
+        #self.error_log = simpleLogger(config['misc']['error_log'])
+        #self.event_log = simpleLogger(config['misc']['event_log'])
         
         if self.botconfig['irc']['keepalive_timeout'] == "":
             self.botconfig['irc']['keepalive_timeout'] = 120
 
-        sys.stdout = self.event_log
-        sys.stderr = self.error_log
+        #sys.stdout = self.event_log
+        #sys.stderr = self.error_log
 
     def on_nicknameinuse(self, c, e):
         c.nick(c.get_nickname() + "_")
@@ -83,17 +95,26 @@ class TestBot(SingleServerIRCBot):
     def on_kick(self, c, e):
         # attempt to rejoin any channel we're kicked from
         if e.arguments[0][0:6] == c.get_nickname():
+            self.logger.info("Kicked from ({}) attempting to rejoin...".format(e.target))
             c.join(e.target)
 
     def on_disconnect(self, c, e):
-        print("DISCONNECT: " + str(e.arguments))
+        self.logger.info("DISCONNECT: " + str(e.arguments))
 
     def on_welcome(self, c, e):
         c.privmsg(
             "NickServ", "identify " + self.botconfig['irc']['identpassword'])
+        self.logger.info("Identifying with NickServ...")
+
         c.oper(self.botconfig['irc']['opernick'],
                self.botconfig['irc']['operpassword'])
+        self.logger.info("Attempting to become IRCop...")
+
+        if self.channel:
+            self.logger.info("Joining channel: ({})".format(self.channel))
         c.join(self.channel)
+
+
         self.alerts(c)
         self.nick_recover(c)
         self.irccontext = c
@@ -104,14 +125,14 @@ class TestBot(SingleServerIRCBot):
         self.keepalive(c)
 
     def on_youreoper(self, c, e):
-        print("I'm an IRCop bitches!")
+        self.logger.info("I'm an IRCop bitches!")
 
     def on_ison(self, c, e):
 
         # strip out extraneous space at the end
         ison_reply = e.arguments[0][:-1]
 
-        # print ("Got ISON reply: %s" % e.arguments[0])
+        self.logger.debug("Got ISON reply: {}".format(e.arguments[0]))
 
         if ison_reply == self.keepalive_nick:
             self.last_keepalive = time.time()
@@ -120,13 +141,11 @@ class TestBot(SingleServerIRCBot):
     def keepalive(self, irc_context):
         if time.time() - self.last_keepalive > int(self.botconfig['irc']['keepalive_timeout']):
             if not self.alive:
-                print("%s: I think we are dead, reconnecting." %
-                      time.strftime("%m/%d/%y %H:%M:%S", time.localtime()))
+                self.logger.info("I think we are dead, reconnecting.")
                 self.jump_server()
                 self.alive = True
                 return
-            print("%s: Keepalive reply not received, sending request" %
-                  time.strftime("%m/%d/%y %H:%M:%S", time.localtime()))
+            self.logger.info("Keepalive reply not received, sending request")
             irc_context.ison([self.keepalive_nick])
             self.alive = False
         else:
@@ -155,11 +174,13 @@ class TestBot(SingleServerIRCBot):
 
         if from_nick == "NickServ":
             if line.find("This nickname is registered and protected.") != -1:
+                self.logger.info("NickServ requested identification.")
                 c.privmsg(
                     "NickServ", "identify " + self.botconfig['irc']['identpassword'])
             # These are responses from NickServ when running the RECOVER
             # command
             elif line.find("Ghost with your nick has been killed.") != -1 or line.find("No one is using your nick, and services are not holding it.") != -1:
+                self.logger.info("Nickname successfully recovered.")
                 c.nick(self.botconfig['irc']['nick'])
 
         if from_nick.find(".") == -1:  # Filter out server NOTICEs
@@ -199,6 +220,8 @@ class TestBot(SingleServerIRCBot):
 
     def on_whoisregnick(self, c, e):
         nick = e.arguments[0]
+        if not self.admincommand:
+            return
         line = self.admincommand
         command = line.split(" ")[0]
         self.admincommand = ""
@@ -209,10 +232,8 @@ class TestBot(SingleServerIRCBot):
                 for line in say:
                     self.split_privmsg(c, nick, line)
 
-        except Exception as inst:
-            traceback.print_exc()
-            print("admin exception: " + line + " : " + str(inst))
-
+        except Exception:
+            self.logger.exception("Admin command: ({}) Exception:".format(command))
     def on_whoreply(self, c, e):
         nick = e.arguments[4]
 
@@ -228,6 +249,7 @@ class TestBot(SingleServerIRCBot):
 
     def process_line(self, c, ircevent, private=False):
         if self.doingcommand:
+            self.logger.debug("Got a command while processing a previous one.")
             return
         self.doingcommand = True
 
@@ -259,8 +281,10 @@ class TestBot(SingleServerIRCBot):
                 e = self.botEvent(linesource, from_nick, hostmask, args)
                 # store the bot's nick in the event in case we need it.
                 e.botnick = c.get_nickname()
+                self.logger.debug("Got command ({}) from nick ({})".format(command, from_nick))
 
                 etmp.append(self.bangcommands[command](self, e))
+                self.logger.debug("Command: ({}) Output: ({})".format(command, e.output))
 
             # lineparsers take the whole line and nick for EVERY line
             # ensure the lineparser function is short and simple. Try to not to add too many of them
@@ -279,11 +303,17 @@ class TestBot(SingleServerIRCBot):
                         if self.isspam(e.hostmask, e.nick):
                             break
                         firstpass = False
+
                     self.botSay(e)
 
         except Exception as inst:
-            traceback.print_exc()
-            print(line + " : " + str(inst))
+            try:
+                e = self.bangcommands["!error"](self, e)
+            except:
+                e.output = "Command failed: {}".format(sys.exc_info())
+
+            self.botSay(e)
+            self.logger.exception("Command: ({}) Exception:".format(command))
             pass
 
         self.doingcommand = False
@@ -303,18 +333,28 @@ class TestBot(SingleServerIRCBot):
                         self.irccontext.notice(botevent.source, line)
                     else:
                         self.irccontext.privmsg(botevent.source, line)
-        except Exception as inst:
-            print("bot failed trying to say " +
-                  str(botevent.output) + "\n" + str(inst))
-            traceback.print_exc()
+        except Exception:
+            self.logger.exception("Bot failed trying to say: ({}) Exception: ({}) ".format(botevent.output))
+
 
     def loadmodules(self):
-        self.tools = vars(imp.load_source("tools", "./botmodules/tools.py"))
+
+        tools_spec = importlib.util.spec_from_file_location("tools", "./botmodules/tools.py")
+        self.tools = importlib.util.module_from_spec(tools_spec)
+        tools_spec.loader.exec_module(self.tools)
+        try:
+            self.tools.__init__(self)
+            self.tools = vars(self.tools)
+        except:
+            self.logger.exception("Could not initialize tools.py:")
+
 
         filenames = []
         for fn in os.listdir('./botmodules'):
-            if fn.endswith('.py') and not fn.startswith('_'):
+            if fn.endswith('.py') and not fn.startswith('_') and fn.find("tools.py") == -1:
                 filenames.append(os.path.join('./botmodules', fn))
+
+        self.logger.debug("Module files found: {}".format(filenames))
 
         self.bangcommands = {}
         self.admincommands = {}
@@ -324,9 +364,11 @@ class TestBot(SingleServerIRCBot):
         for filename in filenames:
             name = os.path.basename(filename)[:-3]
             try:
-                module = imp.load_source(name, filename)
-            except Exception as inst:
-                print("Error loading module " + name + " : " + str(inst))
+                spec = importlib.util.spec_from_file_location(name, filename)
+                module = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(module)
+            except Exception:
+                self.logger.exception("Error loading module: {} Exception:".format(name))
             else:
                 try:
                     vars(module)['__init__'](self)
@@ -412,10 +454,13 @@ class TestBot(SingleServerIRCBot):
         if self.spam[user]['count'] > allow_lines:
             self.spam[user]['limit'] = (self.spam[user]['count'] - 1) * 15
 
-            if not ((self.spam[user]['last'] - self.spam[user]['first']) > self.spam[user]['limit']):
+            time_since_first_line = self.spam[user]['last'] - self.spam[user]['first']
+            if time_since_first_line < self.spam[user]['limit']:
                 bantime = self.spam[user]['limit'] + 15
-                print("%s : %s band %s seconds" % (
-                    time.strftime("%d %b %Y %H:%M:%S", time.localtime()), nick, bantime))
+                self.logger.info("Nick ({}) ignored for %{} seconds. {} lines received in {} seconds".format(nick,
+                                                                                                             bantime,
+                                                                                                             self.spam[user]['count'],
+                                                                                                             time_since_first_line))
                 return True
             else:
                 self.spam[user]['first'] = 0
@@ -426,7 +471,7 @@ class TestBot(SingleServerIRCBot):
     def nick_recover(self, context):
         # Check if our nickname is different than configured for some reason
         if context.get_nickname() != self.botconfig['irc']['nick']:
-
+            self.logger.info("Trying to recover nickname from NickServ")
             # Try to recover using NickServ
             context.privmsg("NickServ", "RECOVER %s %s" %
                             (self.botconfig['irc']['nick'], self.botconfig['irc']['identpassword']))
@@ -448,8 +493,8 @@ class TestBot(SingleServerIRCBot):
                         for channel in self.channels:
                             if channel != '#bopgun' and channel != '#fsw':
                                 self.split_privmsg(context, channel, say)
-        except Exception as inst:
-            print("alerts: " + str(inst))
+        except Exception:
+            self.logger.exception("Alert: ({}) Exception: {}".format(command, inst))
             pass
 
         self.t = threading.Timer(60, self.alerts, [context])
@@ -468,6 +513,13 @@ class TestBot(SingleServerIRCBot):
 
 def main():
     # print sys.argv
+    console = logging.StreamHandler()
+    console.setLevel(logging.INFO)
+    formatter = logging.Formatter('%(name)-12s: %(levelname)-8s %(message)s')
+    console.setFormatter(formatter)
+    rootLogger = logging.getLogger('')
+    rootLogger.addHandler(console)
+    rootLogger.setLevel(logging.DEBUG)
 
     if len(sys.argv) != 4:
 
@@ -475,10 +527,38 @@ def main():
         try:
             cfgfile = open('genmaybot.cfg')
         except IOError:
-            print("You need to create a .cfg file using the example")
+            rootLogger.exception("You need to create a .cfg file using the example")
             sys.exit(1)
 
-        config.readfp(cfgfile)
+        config.read_file(cfgfile)
+        DEBUG_LOG_FILENAME = config['misc']['debug_log']
+        EVENT_LOG_FILENAME = config['misc']['event_log']
+
+        if not DEBUG_LOG_FILENAME or not EVENT_LOG_FILENAME:
+            rootLogger.error("Please configure debug and event log filenames in the config file. Using defaults for now.")
+            config['misc']['debug_log'] = "bot_debug.log"
+            config['misc']['event_log'] = "bot_event.log"
+            DEBUG_LOG_FILENAME = config['misc']['debug_log']
+            EVENT_LOG_FILENAME = config['misc']['event_log']
+
+
+        debug_log_handler = logging.handlers.RotatingFileHandler(
+            DEBUG_LOG_FILENAME, maxBytes=2*(1024**2), backupCount=20)
+        event_log_handler = logging.handlers.RotatingFileHandler(
+            EVENT_LOG_FILENAME, maxBytes=2*(1024**2), backupCount=20)
+
+        formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(module)s.%(funcName)s:%(lineno)d - %(message)s", datefmt='%m-%d %H:%M:%S')
+
+        debug_log_handler.setLevel(logging.DEBUG)
+        event_log_handler.setLevel(logging.INFO)
+        debug_log_handler.setFormatter(formatter)
+        event_log_handler.setFormatter(formatter)
+
+        rootLogger.addHandler(debug_log_handler)
+        rootLogger.addHandler(event_log_handler)
+
+        rootLogger.info("\n----------------------- START OF BOT PROCESS -----------------------\n")
+
         if config['irc']['nick'] and config['irc']['server'] and config['irc']['channels']:
             nickname = config['irc']['nick']
             server, port = config['irc']['server'].split(":", 1)
@@ -499,7 +579,7 @@ def main():
             try:
                 port = int(s[1])
             except ValueError:
-                print("Error: Erroneous port.")
+                rootLogger.exception("Error: Erroneous port.")
                 sys.exit(1)
         else:
             port = 6667
@@ -508,25 +588,6 @@ def main():
 
     bot = TestBot(channel, nickname, server, port)
     bot.start()
-
-# this bullshit is necessary because sys.stdout doesn't write the file
-# continuously
-
-
-class simpleLogger():
-
-    def __init__(self, logfile):
-        self.logfile = logfile
-        open(logfile, "w").write("")  # clear out any previous contents
-
-    def write(self, logtext):
-        logfile = open(self.logfile, "a")
-        logfile.write(logtext)
-        logfile.close()
-        return 0
-
-    def flush(self):
-        return 0
 
 
 if __name__ == "__main__":

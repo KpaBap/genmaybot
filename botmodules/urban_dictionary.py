@@ -11,7 +11,7 @@ def get_urbandictionary(self, e):
     if number and len(searchterm.split(" ")) > 1:
        searchterm = searchterm[3:]
        number = int(number.group(0)[1:2]) - 1
-       print(number)
+       self.logger.debug(number)
     else:
        number = 0
 
