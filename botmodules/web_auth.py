@@ -129,7 +129,7 @@ class AuthController(object):
             if admin in self.bot.botadmins:
                 if token == self.bot.botadmin_webui_tokens[admin]:
                     self.bot.logger.info("Accepted admin UI login from admin ({})".format(admin))
-
+                    self.bot.botadmin_webui_tokens[admin] = None #invalidate token as soon as it's used once
                     cherrypy.session[SESSION_KEY] = cherrypy.request.login = "admin"
                     self.on_login(username)
                     raise cherrypy.HTTPRedirect(from_page or "/")
