@@ -2,7 +2,7 @@
 A python bot running on snoonet's #bicycling channel.
 
 ## Requirements
-* python3
+* python3.5+
 * [pip](https://pip.pypa.io/en/stable/installing/)
 * [virtualenv](https://virtualenv.pypa.io/en/stable/installation/)
 
