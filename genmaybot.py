@@ -56,7 +56,7 @@ class TestBot(SingleServerIRCBot):
         self.logger.info(self.loadmodules())
 
         self.admincommand = None
-        self.keepalive_nick = "OperServ"
+
 
         self.alive = True
 
@@ -82,6 +82,10 @@ class TestBot(SingleServerIRCBot):
         
         if self.botconfig['irc']['keepalive_timeout'] == "":
             self.botconfig['irc']['keepalive_timeout'] = 120
+
+        if self.botconfig['irc']['keepalive_nick'] == "":
+            self.botconfig['irc']['keepalive_nick'] = "OperServ"
+
 
         #sys.stdout = self.event_log
         #sys.stderr = self.error_log
@@ -134,7 +138,7 @@ class TestBot(SingleServerIRCBot):
 
         self.logger.debug("Got ISON reply: {}".format(e.arguments[0]))
 
-        if ison_reply == self.keepalive_nick:
+        if ison_reply == self.botconfig['irc']['keepalive_nick']:
             self.last_keepalive = time.time()
             self.alive = True
 
@@ -146,15 +150,15 @@ class TestBot(SingleServerIRCBot):
                 self.alive = True
                 return
             self.logger.info("Keepalive reply not received, sending request")
-            irc_context.ison([self.keepalive_nick])
+            irc_context.ison([self.botconfig['irc']['keepalive_nick']])
             self.alive = False
         else:
             # Send ISON command on configured nick
-            irc_context.ison([self.keepalive_nick])
+            irc_context.ison([self.botconfig['irc']['keepalive_nick']])
             pass
 
         self.keepaliveTimer = threading.Timer(
-            30, self.keepalive, [irc_context])
+            3, self.keepalive, [irc_context])
         self.keepaliveTimer.start()
 
     def on_whoishostline(self, c, e):
@@ -520,6 +524,7 @@ def main():
     rootLogger = logging.getLogger('')
     rootLogger.addHandler(console)
     rootLogger.setLevel(logging.DEBUG)
+    retries = 0
 
     if len(sys.argv) != 4:
 
@@ -533,6 +538,9 @@ def main():
         config.read_file(cfgfile)
         DEBUG_LOG_FILENAME = config['misc']['debug_log']
         EVENT_LOG_FILENAME = config['misc']['event_log']
+        if config['misc']['spawn_failure_retries'] == "":
+            config['misc']['spawn_failure_retries'] = 2
+
 
         if not DEBUG_LOG_FILENAME or not EVENT_LOG_FILENAME:
             rootLogger.error("Please configure debug and event log filenames in the config file. Using defaults for now.")
@@ -585,10 +593,21 @@ def main():
             port = 6667
         channel = sys.argv[2]
         nickname = sys.argv[3]
+    while retries <= int(config['misc']['spawn_failure_retries']):
+        retries += 1
+        try:
+            bot = TestBot(channel, nickname, server, port)
+            bot.start()
+        except OSError:
+            rootLogger.exception("Something went horribly wrong while trying to spawn the bot (try #{}):".format(retries))
+            pass
 
-    bot = TestBot(channel, nickname, server, port)
-    bot.start()
-
+    rootLogger.error("Could not recover. Exiting process.")
+    import os; os._exit(1) #JUST DIE ALREADY
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except:
+        logging.exception("Exception in main thread, big trouble:")
+        sys.exit(1)
