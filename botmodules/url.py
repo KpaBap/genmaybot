@@ -38,7 +38,7 @@ def url_posted(self, e, titlecall=False):
         cursor.execute('''CREATE TABLE 'links' ("url" tinytext, "hash" char(56) NOT NULL UNIQUE, "reposted" smallint(5) default '0', "timestamp" timestamp NOT NULL default CURRENT_TIMESTAMP);''')
         cursor.execute('''CREATE INDEX "links_hash" ON 'links' ("hash");''')
 
-    query = "SELECT reposted, timestamp FROM links WHERE hash='%s'" % urlhash
+    query = "SELECT reposted, timestamp, url FROM links WHERE hash='%s'" % urlhash
     result = cursor.execute(query)
     result = cursor.fetchone()
     if result and result[0] != 0:
@@ -69,6 +69,7 @@ def url_posted(self, e, titlecall=False):
                 days = " (posted %s hour%s ago)" % (str(hrs), plural)
 
     title = ""
+    url = result[2]
 
     try:
         wiki = self.bangcommands["!wiki"](self, e, True)
@@ -96,6 +97,9 @@ def url_posted(self, e, titlecall=False):
     if not titlecall:
         cursor.execute("""UPDATE OR IGNORE links SET reposted=reposted+1 WHERE hash = ?""", [urlhash])
 
+
+
+
     cursor.execute("""INSERT OR IGNORE INTO links(url, hash) VALUES (?,?)""", (url, urlhash))
     conn.commit()
 
@@ -118,9 +122,12 @@ def url_posted(self, e, titlecall=False):
         title = re.sub('\s+', ' ', title)
         title = re.sub('(?i)whatsisname', '', title)
 
+    if not titlecall:
+        url = ""
+    else:
+        url = " ( {} )".format(url)
 
-
-        e.output = "%s%s%s" % (repost, title, days)
+        e.output = "%s%s%s%s" % (repost, title, days, url)
 
     conn.close()
 
