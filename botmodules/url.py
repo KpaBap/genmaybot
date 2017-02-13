@@ -142,17 +142,19 @@ def get_title(self, e, url):
         except:
             pass
     elif page:
-        title = "Title: " + page.find('title').string
         try:
-            meta_title = "Title: " + page.find('meta', attrs={'property': "og:title"}).get("content")
+            title = "Title: " + page.find('title').string
         except:
-            meta_title = False
+            title = ""
+
+        try:
+            title = "Title: " + page.find('meta', attrs={'property': "og:title"}).get("content")
+        except:
+            title = ""
         
         
-    if meta_title:
-        return meta_title
-    else:
         return title
+
 
 
 def last_title(self, e):

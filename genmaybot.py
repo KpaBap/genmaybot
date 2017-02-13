@@ -298,7 +298,10 @@ class TestBot(SingleServerIRCBot):
                 e = self.botEvent(linesource, from_nick, hostmask, line)
                 # store the bot's nick in the event in case we need it.
                 e.botnick = c.get_nickname()
-                etmp.append(command(self, e))
+                try:
+                    etmp.append(command(self, e))
+                except:
+                    self.logger.exception("Line parser: ({}) Exception:".format(command))
 
             firstpass = True
             for e in etmp:
@@ -310,15 +313,15 @@ class TestBot(SingleServerIRCBot):
 
                     self.botSay(e)
 
-        except Exception as inst:
+        except:
+            self.logger.exception("Command: ({}) Exception:".format(command))
             try:
                 e = self.bangcommands["!error"](self, e)
             except:
                 e.output = "Command failed: {}".format(sys.exc_info())
 
             self.botSay(e)
-            self.logger.exception("Command: ({}) Exception:".format(command))
-            pass
+
 
         self.doingcommand = False
         return
@@ -498,8 +501,7 @@ class TestBot(SingleServerIRCBot):
                             if channel != '#bopgun' and channel != '#fsw':
                                 self.split_privmsg(context, channel, say)
         except Exception:
-            self.logger.exception("Alert: ({}) Exception: {}".format(command, inst))
-            pass
+            self.logger.exception("Alert: ({}) Exception:".format(command))
 
         self.t = threading.Timer(60, self.alerts, [context])
         self.t.start()
