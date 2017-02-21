@@ -308,6 +308,9 @@ class TestBot(SingleServerIRCBot):
                 if e and e.output:
                     if firstpass and not e.source == e.nick and not e.nick in self.botadmins:
                         if self.isspam(e.hostmask, e.nick):
+                            bantime = self.spam[e.hostmask]['limit'] + 15
+                            output = "You've been ignored for {} seconds. Slow your roll and try again later.".format(bantime)
+                            self.irccontext.notice(e.nick, output)
                             break
                         firstpass = False
 
@@ -464,7 +467,7 @@ class TestBot(SingleServerIRCBot):
             time_since_first_line = self.spam[user]['last'] - self.spam[user]['first']
             if time_since_first_line < self.spam[user]['limit']:
                 bantime = self.spam[user]['limit'] + 15
-                self.logger.info("Nick ({}) ignored for %{} seconds. {} lines received in {} seconds".format(nick,
+                self.logger.info("Nick ({}) ignored for {} seconds. {} lines received in {} seconds".format(nick,
                                                                                                              bantime,
                                                                                                              self.spam[user]['count'],
                                                                                                              time_since_first_line))
