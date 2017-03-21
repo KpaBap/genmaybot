@@ -1,3 +1,5 @@
+# -*- coding: UTF-8 -*-
+
 import urllib.request, urllib.parse, urllib, xml.dom.minidom
 import json, time, re
 try:
@@ -110,6 +112,43 @@ def bearing_to_compass(bearing):
         elif bearing >= dirs['N'][0] or bearing <= dirs['N'][1]:
             return "N"
 
+def bearing_to_arrow(bearing):
+    directions = {
+        "↓": (337.5, 22.5),
+        "↘︎": (292.5, 337.5),
+        "→": (247.5, 292.5),
+        "↗︎": (202.5, 247.5),
+        "↑": (157.5, 202.5),
+        "↖︎": (112.5 ,157.5),
+        "←": (67.5, 112.5),
+        "↙︎": (22.5, 67.5)
+    }
+    for direction in directions:
+        min, max = directions[direction]
+        if bearing >= min and bearing <= max:
+            return direction
+        elif bearing >= directions['↓'][0] or bearing <= directions['↓'][1]:
+            return '↓'
+
+def weather_summary_to_icon(icon):
+
+    icons = {
+        "cloudy": "\U00002601",
+        "partly-cloudy-day": "\U0001F324",
+        "clear-day": "️\U00002600",
+        "clear-night": "\U0001F319",
+        "rain": "\U0001F327",
+        "snow": "\U00002744",
+        "wind": "\U0001F4A8",
+        "fog": "\U0001F32B"
+
+    }
+
+    try:
+        return icons[icon]
+    except KeyError:
+
+        return ""
 
 def get_weather(self, e):
 
@@ -169,12 +208,15 @@ def forecast_io(self,e, location=""):
     humidity = int(100*current_conditions['humidity'])
     precip_probability = current_conditions['precipProbability']
     current_summary = current_conditions['summary']
+    summary_icon = weather_summary_to_icon(current_conditions['icon'])
     
     wind_speed = int(round(current_conditions['windSpeed'], 0))
     wind_speed_kmh = int(round(wind_speed * 1.609, 0))
 
     wind_direction = current_conditions['windBearing']
+    wind_arrow = bearing_to_arrow(wind_direction)
     wind_direction = bearing_to_compass(wind_direction)
+
 
     cloud_cover = int(100*current_conditions['cloudCover'])
     
@@ -208,9 +250,9 @@ def forecast_io(self,e, location=""):
 
 
     if not country: #If we're in the US, use Fahrenheit, otherwise Celsius    
-        output = "{} / {} / {}°F{} / Humidity: {}% / Wind: {} at {} mph / Cloud Cover: {}% / High: {}°F Low: {}°F / Outlook: {}"
-        e.output = output.format(address, current_summary, temp,
-                          feels_like, humidity,
+        output = "{} / {} {} / {}°F{} / Humidity: {}% / Wind: {} {} at {} mph / Cloud Cover: {}% / High: {}°F Low: {}°F / Outlook: {}"
+        e.output = output.format(address, current_summary, summary_icon, temp,
+                          feels_like, humidity, wind_arrow,
                           wind_direction, wind_speed,
                           cloud_cover, max_temp, min_temp, outlook)
     else: #Outside of the US
@@ -223,9 +265,9 @@ def forecast_io(self,e, location=""):
             except:
                 pass
 
-        output = "{} / {} / {}°C{} / Humidity: {}% / Wind: {} at {} km/h / Cloud Cover: {}% / High: {}°C Low: {}°C / Outlook: {}"
-        e.output = output.format(address, current_summary, temp_c,
-                          feels_like, humidity, wind_direction,
+        output = "{} / {} {} / {}°C{} / Humidity: {}% / Wind: {} {} at {} km/h / Cloud Cover: {}% / High: {}°C Low: {}°C / Outlook: {}"
+        e.output = output.format(address, current_summary, summary_icon, temp_c,
+                          feels_like, humidity, wind_arrow, wind_direction,
                           wind_speed_kmh, cloud_cover, max_temp_c,
                           min_temp_c, outlook)
     return e
