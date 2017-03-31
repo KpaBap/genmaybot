@@ -29,6 +29,7 @@ import threading
 import traceback
 import textwrap
 import logging, logging.handlers
+from jaraco.stream import buffer
 
 # We need this in order to catch whois reply from a registered nick.
 irc.events.numeric["307"] = "whoisregnick"
@@ -42,6 +43,8 @@ class TestBot(SingleServerIRCBot):
             self, [(server, port)], nickname, nickname)
         self.channel = channel
         self.doingcommand = False
+
+        self.connection.buffer_class = buffer.LenientDecodingLineBuffer
 
         self.botnick = nickname
         self.logger = logging.getLogger(self.botnick)
