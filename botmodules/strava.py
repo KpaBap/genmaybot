@@ -9,7 +9,7 @@ from urllib.parse import urlparse
 from bs4 import BeautifulSoup
 import random
 
-class webServer:
+class WebServer:
     def __init__(self, strava_client_secret,
                  strava_client_id):  # Get the strava client ID/secrets for the Oauth exchange later
         self.strava_client_secret = strava_client_secret
@@ -39,7 +39,8 @@ class webServer:
         elif (error != None) or (code == None):
             return "Invalid or empty access code received from Strava. Please try to authenticate again."
 
-    def strava_insert_token(self, user, token):
+    @staticmethod
+    def strava_insert_token(user, token):
         """ Insert a user's strava token into the token table """
         conn = sqlite3.connect('strava.sqlite')
         c = conn.cursor()
@@ -73,7 +74,7 @@ def strava_get_token(user):
         result = c.execute(query, {'user': user}).fetchone()
     except:
         return False
-    if (result):
+    if result:
         c.close()
         return result[0]
     else:
@@ -137,7 +138,7 @@ def __init__(self):
     cherrypy.engine.autoreload.on = True
     cherrypy.log.screen = False
     cherrypy.config.update({'server.socket_host': '0.0.0.0', 'server.socket_port': web_port})
-    cherrypy.tree.mount(webServer(strava_client_secret, strava_client_id), "/strava")
+    cherrypy.tree.mount(WebServer(strava_client_secret, strava_client_id), "/strava")
 
     # wait a little bit for other instances to finish starting
     time.sleep(1.5)
@@ -173,12 +174,12 @@ def strava_check_upgrades():
     """ Check the version in the database and upgrade the system recursively until we're at the current version """
     software_version = strava_get_version('software')
     latest_version = strava_software_version()
-    if (software_version == False):
+    if software_version == False:
         # This must be a new revision
         # we need to set it to the current version that is being installed.
         strava_set_version('software', latest_version)
         strava_check_upgrades()
-    elif (software_version < strava_software_version()):
+    elif software_version < strava_software_version():
         # Then we need to perform an upgrade for this version.
         func = 'strava_upgrade_%s' % (software_version + 1)
         globals()[func]()
@@ -204,7 +205,7 @@ def strava_get_version(version_field):
     c = conn.cursor()
     query = "SELECT version_number FROM version WHERE version_field = :version_field"
     result = c.execute(query, {'version_field': version_field}).fetchone()
-    if (result):
+    if result:
         c.close()
         return result[0]
     else:
@@ -221,7 +222,7 @@ def strava_check_create_tables():
         'athletes': "CREATE TABLE athletes (user TEXT UNIQUE ON CONFLICT REPLACE, strava_id TEXT)"
     }
     # Go through each table and check if it exists, if it doesn't, run the SQL statement to create it.
-    for (table_name, sql_statement) in tables.items():
+    for  table_name, sql_statement in tables.items():
         query = "SELECT name FROM sqlite_master WHERE type='table' AND name=:table_name"
         if not c.execute(query, {'table_name': table_name}).fetchone():
             # Run the command.
@@ -256,7 +257,7 @@ def strava_get_athlete(nick):
     c = conn.cursor()
     query = "SELECT strava_id FROM athletes WHERE UPPER(user) = UPPER(?)"
     result = c.execute(query, [nick]).fetchone()
-    if (result):
+    if result:
         c.close()
         return result[0]
     else:
@@ -293,7 +294,7 @@ def strava_set_athlete(self, e):
     """ Set an athlete's Strava ID. """
     if e.input.isdigit():
         # Insert the user strava id, we should probably validate the user though right?
-        if (strava_is_valid_user(e.input)):
+        if strava_is_valid_user(e.input):
             strava_insert_athlete(e.nick, e.input)
             self.irccontext.privmsg(e.nick, "Your Strava ID has been set to %s. Now go play bikes." % (e.input))
         else:
@@ -585,8 +586,8 @@ def strava_command_handler(self, e):
 
     # There is something in input
     # EX: "achievements 12345"
-    if (arg_is_present(words)):
-        if (is_known_arg(words, arg_list)):
+    if arg_is_present(words):
+        if is_known_arg(words, arg_list):
             # Always clean the arg even if no value is present, patch strava* functions to handle None for e.input
             # EX: "12345" or None
             e.input = clean_arg_from_input(e.input)
@@ -615,13 +616,13 @@ def arg_is_present(words):
 
 def is_known_arg(args, known_args):
     results = [arg for arg in args if arg in known_args]
-    if (len(results)):
+    if len(results):
         return 1
     return 0
 
 
 def clean_arg_from_input(string):
-    if (len(string.split()) > 1):
+    if len(string.split()) > 1:
         return ' '.join(string.split()[1:])
     return
 
@@ -635,7 +636,7 @@ def strava_extract_latest_ride(self, response, e, athlete_id=None):
         recent_ride = response[0]
         recent_ride = strava_get_ride_extended_info(self, recent_ride['id'])
         if recent_ride:
-            return strava_ride_to_string(recent_ride, athlete_id, dvq=(e.nick == "dvq" or e.input == "dvq"))
+            return strava_ride_to_string(recent_ride, athlete_id, dvq=e.nick == "dvq" or e.input == "dvq")
         else:
             return "Sorry %s, an error has occured attempting to retrieve the most recent ride's details. They said Ruby was webscale..." % (
             e.nick)

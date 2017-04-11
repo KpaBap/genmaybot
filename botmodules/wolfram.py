@@ -1,7 +1,9 @@
 import urllib, urllib.request, urllib.error, urllib.parse, xml.dom.minidom, socket, traceback, re
 import random
-try: import botmodules.userlocation as user
-except: pass
+try:
+    import botmodules.userlocation as user
+except:
+    pass
 
 
 def get_wolfram(self, e):
@@ -26,7 +28,7 @@ def get_wolfram(self, e):
     dom = xml.dom.minidom.parse(urllib.request.urlopen(url))
     socket.setdefaulttimeout(10)
 
-    if (dom.getElementsByTagName("queryresult")[0].getAttribute("success") == "false"):
+    if dom.getElementsByTagName("queryresult")[0].getAttribute("success") == "false":
         try:
             related = dom.getElementsByTagName("relatedexample")[0].getAttribute("input")
             e.input = related

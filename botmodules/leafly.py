@@ -163,7 +163,8 @@ class Leafly:
                             effects=effects,
                             permalink=permalink)
 
-    def request_json(self, url, data=None, headers={}):
+    @staticmethod
+    def request_json(url, data=None, headers={}):
         # Request and parse JSON and return the object
         req = urllib.request.Request(url)
 

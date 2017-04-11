@@ -1,7 +1,7 @@
 import re
 
 def get_chainlove(self, e):
-    page = self.tools["load_html_from_URL"]("http://chainlove.com/")
+    page = self.tools["load_html_from_url"]("http://chainlove.com/")
     title = str(page.head.title.text).replace("Chainlove.com:" , "http://chainlove.com -")
     page = page.text
     timeleft = int(re.search("(BCNTRY.setupTimerBar\()(\d+)(,\d+\))", page).group(2))

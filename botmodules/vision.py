@@ -29,8 +29,9 @@ def url_is_image(url):
 def image_vision(self, e):
     key = self.botconfig["APIkeys"]["msvisionkey"]
     
-    class tmp(): pass
-    tmpevent = tmp()
+    class Tmp():
+        pass
+    tmpevent = Tmp()
     tmpevent.output = ""
     #print ("Vision input ({})".format(e.input))
     if e.input:
@@ -43,10 +44,10 @@ def image_vision(self, e):
     
     values = json.dumps({"url": url})
     self.logger.debug(values)
-    requestUrl = "https://api.projectoxford.ai/vision/v1.0/analyze?visualFeatures=Description,Adult"
+    request_url = "https://api.projectoxford.ai/vision/v1.0/analyze?visualFeatures=Description,Adult"
     headers = {'Ocp-Apim-Subscription-Key' : key,
                'Content-Type': 'application/json'}
-    req = urllib.request.Request(requestUrl, values.encode(), headers)
+    req = urllib.request.Request(request_url, values.encode(), headers)
     response = urllib.request.urlopen(req)
     results = json.loads(response.read().decode('utf-8'))
 

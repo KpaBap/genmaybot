@@ -1,7 +1,7 @@
 import datetime, urllib.request
 import json
 
-def get_nhl_live_games(self, e, webCall=False):
+def get_nhl_live_games(self, e, web_call=False):
     if e.input:
         today = e.input
     else:
@@ -26,7 +26,7 @@ def get_nhl_live_games(self, e, webCall=False):
                                                   game['bs'])
         games.append(gametxt)
 
-    if webCall:
+    if web_call:
         return " | ".join(games)
 
     e.output = " | ".join(games)

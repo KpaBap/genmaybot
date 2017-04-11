@@ -46,7 +46,7 @@ def latest_tweet(self, e):
     return e
 latest_tweet.command = "!lasttweet"
 
-def breaking_alert():
+def breaking_alert(self):
     #returns a new breaking news only if it hasn't returned it before
       try:
         description, updated, ago = read_timeline('breakingnews')
@@ -58,6 +58,6 @@ def breaking_alert():
             return description
       except Exception as inst:
           self.logger.debug("breakinglert: " + str(inst))
-          pass
+
 breaking_alert.lastcheck = ""
 breaking_alert.alert = False

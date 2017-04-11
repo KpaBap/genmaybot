@@ -72,15 +72,15 @@ rules = { 1: "Obey the Rules", 2: "Lead by example", 3: "Guide the uninitiated",
  }
 
 
-def getRule(self, e):
-    if (e.input):
+def get_rule(self, e):
+    if e.input:
         try:
             rule_num = int(e.input)
         except ValueError:
             rule_num = 0
 
         ## Valid Rule
-        if (rule_num > 0 and rule_num <= len(rules)):
+        if rule_num > 0 and rule_num <= len(rules):
             e.output = "Rule %d: %s" % (rule_num, rules[rule_num])
 
         ## Invalid Rule
@@ -95,5 +95,5 @@ def getRule(self, e):
     return e
 
 
-getRule.command = "!rule"
-getRule.helptext = "!rule <RuleID> : Shows the corresponding velominati rule."
+get_rule.command = "!rule"
+get_rule.helptext = "!rule <RuleID> : Shows the corresponding velominati rule."

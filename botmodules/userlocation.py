@@ -28,59 +28,59 @@ def get_location(nick):
     
 
 
-def get_geoIP_location(self, e="", ip="", nick="", whois_reply=False, callback=""): 
+def get_geo_ip_location(self, e="", ip="", nick="", whois_reply=False, callback=""):
 # This function gets called twice so we need to account for the different calls
 # It gets called once by a server side event
 # then again when the server responds with the whois IP information
     ##import pdb; pdb.set_trace()
     if callback:
-        get_geoIP_location.callback = callback
+        get_geo_ip_location.callback = callback
 
-    if whois_reply and get_geoIP_location.callback:
+    if whois_reply and get_geo_ip_location.callback:
 
         #we're basically doing a fake call to the original requestor function
         #We set the <arg> portion of !command <arg> to give it expected input
         # GeoIP URL is http://freegeoip.net/json/<ip>
         
-        get_geoIP_location.callback.waitfor_callback=False
+        get_geo_ip_location.callback.waitfor_callback=False
         ##import pdb; pdb.set_trace()
-        e.location = get_geoIP(ip)
-        response = get_geoIP_location.callback(self, e)
-        self.botSay(response) #since this is a callback, we have to say the line ourselves
+        e.location = get_geo_ip(ip)
+        response = get_geo_ip_location.callback(self, e)
+        self.bot_say(response) #since this is a callback, we have to say the line ourselves
         
     elif whois_reply:
-        e.output = get_geoIP(ip)
-        self.botSay(e)
+        e.output = get_geo_ip(ip)
+        self.bot_say(e)
     elif not callback:
         try: 
             #Try to look up an IP address that was given as a command arugment
             #If that fails, fall back to whois info    
             if e.input:
-                e.output = get_geoIP(e.input)
-                self.botSay(e)
+                e.output = get_geo_ip(e.input)
+                self.bot_say(e)
                 return
             else:
-                request_whoisIP(self, get_geoIP_location, nick, e)    
+                request_whois_ip(self, get_geo_ip_location, nick, e)
         except:
             pass
     else:
-        request_whoisIP(self, get_geoIP_location, nick, e)
+        request_whois_ip(self, get_geo_ip_location, nick, e)
     
-get_geoIP_location.command = "!geoip"
-get_geoIP_location.callback = None
-get_geoIP_location.helptext = "Looks up your IP address and attempts to return a location based on it."
+get_geo_ip_location.command = "!geoip"
+get_geo_ip_location.callback = None
+get_geo_ip_location.helptext = "Looks up your IP address and attempts to return a location based on it."
 
-def get_geoIP(ip):
-    location = get_geoIP_netimpact(ip)
+def get_geo_ip(ip):
+    location = get_geo_ip_netimpact(ip)
     if location:
         return location
     #import pdb; pdb.set_trace()
-    location = get_geoIP_free(ip)
+    location = get_geo_ip_free(ip)
     if location:
         return location
 
     
-def get_geoIP_free(ip):
+def get_geo_ip_free(ip):
     ip = urllib.parse.quote(ip)
     
     url = "http://freegeoip.net/json/{}".format(ip)
@@ -98,7 +98,7 @@ def get_geoIP_free(ip):
     else:
         return False
 
-def get_geoIP_netimpact(ip):
+def get_geo_ip_netimpact(ip):
 
 #http://api.netimpact.com/qv1.php?key=WdpY8qgDVuAmvgyJ&qt=geoip&d=json&q=<ip>
     ip = urllib.parse.quote(ip)
@@ -116,7 +116,7 @@ def get_geoIP_netimpact(ip):
         return False
 
 
-def request_whoisIP(self, reply_handler, nick="", e=""):
+def request_whois_ip(self, reply_handler, nick="", e=""):
     #import pdb; pdb.set_trace()
 # This function sends the whois request and registers the response handler    
 # We also need to store the source event that triggered the whois request     

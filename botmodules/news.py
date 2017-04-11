@@ -32,7 +32,6 @@ def get_newest_rss(self, url):
     description = description.replace("\n", "")
 
     description = self.tools['remove_html_tags'](description)
-    #description = description[0:len(description) - 9]
     description = description.strip()
     if description.rfind(".") != -1:
         description = description[0:description.rfind(".") + 1]

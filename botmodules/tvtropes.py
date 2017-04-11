@@ -11,7 +11,7 @@ def get_trope(self, e, urlposted=False):
         searchterm = "site:tvtropes.org " + e.input
         url = self.tools['google_url'](searchterm, "tvtropes.org/pmwiki/pmwiki.php")
 
-    page, url = self.tools["load_html_from_URL"](url, returnurl=True)
+    page, url = self.tools["load_html_from_url"](url, returnurl=True)
 
     pagetitle = page.find("div", {"class": "pagetitle"}).span.string
     page = page.select('#wikitext')[0].extract()
@@ -27,7 +27,7 @@ def get_trope(self, e, urlposted=False):
         trope = trope[0:trope.rfind(".") + 1]
 
     if not urlposted:
-        trope = (trope + " [ %s ]" % self.tools['shorten_url'](url))
+        trope = trope + " [ %s ]" % self.tools['shorten_url'](url)
 
     e.output = trope
     return e

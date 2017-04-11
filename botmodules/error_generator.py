@@ -85,17 +85,16 @@ seng_thirdwords = ["Design", "Maintenance", "Testing", "Production", "Implementa
 
 
 def bbnet(self, e):
-    if (e.nick.lower().startswith('rc')):
+    if e.nick.lower().startswith('rc'):
         e.output = "lol"
         return e
     
     lols = generatelols()
-    if (e.nick.lower().startswith('bbnet')):
+    if e.nick.lower().startswith('bbnet'):
         e.output = "<%s> !bbnet\n^\n%s" % (e.nick, lols)
     else:
         e.output = lols
-    
-   # e.output = "%s %s" % (e.output, lols.__len__())
+
     return e 
 
 bbnet.command = "!bbnet"

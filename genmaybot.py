@@ -31,6 +31,7 @@ import textwrap
 import logging, logging.handlers
 from jaraco.stream import buffer
 
+
 # We need this in order to catch whois reply from a registered nick.
 irc.events.numeric["307"] = "whoisregnick"
 socket.setdefaulttimeout(5)
@@ -80,18 +81,12 @@ class TestBot(SingleServerIRCBot):
             self.botadmin_webui_tokens[admin] = None
 
         self.logger.info("Bot admins: {}".format(self.botadmins))
-        #self.error_log = simpleLogger(config['misc']['error_log'])
-        #self.event_log = simpleLogger(config['misc']['event_log'])
-        
         if self.botconfig['irc']['keepalive_timeout'] == "":
             self.botconfig['irc']['keepalive_timeout'] = 120
 
         if self.botconfig['irc']['keepalive_nick'] == "":
             self.botconfig['irc']['keepalive_nick'] = "OperServ"
 
-
-        #sys.stdout = self.event_log
-        #sys.stderr = self.error_log
 
     def on_nicknameinuse(self, c, e):
         c.nick(c.get_nickname() + "_")
@@ -158,7 +153,6 @@ class TestBot(SingleServerIRCBot):
         else:
             # Send ISON command on configured nick
             irc_context.ison([self.botconfig['irc']['keepalive_nick']])
-            pass
 
         self.keepaliveTimer = threading.Timer(
             3, self.keepalive, [irc_context])
@@ -285,7 +279,7 @@ class TestBot(SingleServerIRCBot):
             # commands names are defined by the module as function.command =
             # "!commandname"
             if command in self.bangcommands and (self.commandaccess(command) or from_nick in self.botadmins):
-                e = self.botEvent(linesource, from_nick, hostmask, args)
+                e = self.Botevent(linesource, from_nick, hostmask, args)
                 # store the bot's nick in the event in case we need it.
                 e.botnick = c.get_nickname()
                 self.logger.debug("Got command ({}) from nick ({})".format(command, from_nick))
@@ -298,7 +292,7 @@ class TestBot(SingleServerIRCBot):
             # Multiple lineparsers can output data, leading to multiple 'say'
             # lines
             for command in self.lineparsers:
-                e = self.botEvent(linesource, from_nick, hostmask, line)
+                e = self.Botevent(linesource, from_nick, hostmask, line)
                 # store the bot's nick in the event in case we need it.
                 e.botnick = c.get_nickname()
                 try:
@@ -317,7 +311,7 @@ class TestBot(SingleServerIRCBot):
                             break
                         firstpass = False
 
-                    self.botSay(e)
+                    self.bot_say(e)
 
         except:
             self.logger.exception("Command: ({}) Exception:".format(command))
@@ -326,7 +320,7 @@ class TestBot(SingleServerIRCBot):
             except:
                 e.output = "Command failed: {}".format(sys.exc_info())
 
-            self.botSay(e)
+            self.bot_say(e)
 
 
         self.doingcommand = False
@@ -337,7 +331,7 @@ class TestBot(SingleServerIRCBot):
         for line in textwrap.wrap(output, output_max_length):
             client.privmsg(nick, line)
 
-    def botSay(self, botevent):
+    def bot_say(self, botevent):
         try:
             if botevent.output:
                 for line in botevent.output.split("\n"):
@@ -396,9 +390,8 @@ class TestBot(SingleServerIRCBot):
                         self.admincommands[command] = func
                     elif hasattr(func, 'alert'):
                         self.botalerts.append(func)
-                    elif hasattr(func, 'lineparser'):
-                        if func.lineparser:
-                            self.lineparsers.append(func)
+                    elif hasattr(func, 'lineparser') and func.lineparser:
+                        self.lineparsers.append(func)
 
         commands, botalerts, lineparsers, admincommands = "", "", "", ""
 
@@ -409,10 +402,10 @@ class TestBot(SingleServerIRCBot):
             commands = "No command modules loaded!"
         if self.botalerts:
             botalerts = 'Loaded alerts: %s' % ', '.join(
-                (command.__name__ for command in self.botalerts))
+                command.__name__ for command in self.botalerts)
         if self.lineparsers:
             lineparsers = 'Loaded line parsers: %s' % ', '.join(
-                (command.__name__ for command in self.lineparsers))
+                command.__name__ for command in self.lineparsers)
         if self.admincommands:
             admincommands = 'Loaded admin commands: %s' % list(
                 self.admincommands.keys())
@@ -450,7 +443,7 @@ class TestBot(SingleServerIRCBot):
             self.spam.pop(key)
         # end clean up job
 
-        if not (user in self.spam):
+        if not user in self.spam:
             self.spam[user] = {}
             self.spam[user]['count'] = 0
             self.spam[user]['last'] = 0
@@ -512,7 +505,7 @@ class TestBot(SingleServerIRCBot):
         self.t = threading.Timer(60, self.alerts, [context])
         self.t.start()
 
-    class botEvent:
+    class Botevent:
 
         def __init__(self, source, nick, hostmask, inpt, output="", notice=False):
             self.source = source
@@ -524,14 +517,13 @@ class TestBot(SingleServerIRCBot):
 
 
 def main():
-    # print sys.argv
     console = logging.StreamHandler()
     console.setLevel(logging.INFO)
     formatter = logging.Formatter('%(name)-12s: %(levelname)-8s %(message)s')
     console.setFormatter(formatter)
-    rootLogger = logging.getLogger('')
-    rootLogger.addHandler(console)
-    rootLogger.setLevel(logging.DEBUG)
+    root_logger = logging.getLogger('')
+    root_logger.addHandler(console)
+    root_logger.setLevel(logging.DEBUG)
     retries = 0
 
     if len(sys.argv) != 4:
@@ -540,7 +532,7 @@ def main():
         try:
             cfgfile = open('genmaybot.cfg')
         except IOError:
-            rootLogger.exception("You need to create a .cfg file using the example")
+            root_logger.exception("You need to create a .cfg file using the example")
             sys.exit(1)
 
         config.read_file(cfgfile)
@@ -551,7 +543,7 @@ def main():
 
 
         if not DEBUG_LOG_FILENAME or not EVENT_LOG_FILENAME:
-            rootLogger.error("Please configure debug and event log filenames in the config file. Using defaults for now.")
+            root_logger.error("Please configure debug and event log filenames in the config file. Using defaults for now.")
             config['misc']['debug_log'] = "bot_debug.log"
             config['misc']['event_log'] = "bot_event.log"
             DEBUG_LOG_FILENAME = config['misc']['debug_log']
@@ -570,10 +562,10 @@ def main():
         debug_log_handler.setFormatter(formatter)
         event_log_handler.setFormatter(formatter)
 
-        rootLogger.addHandler(debug_log_handler)
-        rootLogger.addHandler(event_log_handler)
+        root_logger.addHandler(debug_log_handler)
+        root_logger.addHandler(event_log_handler)
 
-        rootLogger.info("\n----------------------- START OF BOT PROCESS -----------------------\n")
+        root_logger.info("\n----------------------- START OF BOT PROCESS -----------------------\n")
 
         if config['irc']['nick'] and config['irc']['server'] and config['irc']['channels']:
             nickname = config['irc']['nick']
@@ -595,7 +587,7 @@ def main():
             try:
                 port = int(s[1])
             except ValueError:
-                rootLogger.exception("Error: Erroneous port.")
+                root_logger.exception("Error: Erroneous port.")
                 sys.exit(1)
         else:
             port = 6667
@@ -607,11 +599,10 @@ def main():
             bot = TestBot(channel, nickname, server, port)
             bot.start()
         except OSError:
-            rootLogger.exception("Something went horribly wrong while trying to spawn the bot (try #{}):".format(retries))
-            pass
+            root_logger.exception("Something went horribly wrong while trying to spawn the bot (try #{}):".format(retries))
 
-    rootLogger.error("Could not recover. Exiting process.")
-    import os; os._exit(1) #JUST DIE ALREADY
+    root_logger.error("Could not recover. Exiting process.")
+    os._exit(1) #JUST DIE ALREADY
 
 if __name__ == "__main__":
     try:

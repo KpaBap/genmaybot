@@ -44,7 +44,6 @@ def get_sun(self, e):
        td = now - sunriseobj
        ago = "ago"
     til = self.tools['prettytimedelta'](td)
-    #til = td
     sunrise = "{} ({} {})".format(sunrise, til, ago)
     if sunsetobj > now:
        ago = "from now"
@@ -52,7 +51,6 @@ def get_sun(self, e):
     else:
        ago = "ago"
        td = now - sunsetobj
-    #til = td
     til = self.tools['prettytimedelta'](td)
     sunset = "{} ({} {})".format(sunset, til, ago)
 

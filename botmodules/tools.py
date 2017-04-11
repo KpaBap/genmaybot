@@ -81,7 +81,7 @@ def google_url(searchterm, regexstring):
     for result in results:
         bot_object.logger.debug("Got URL from Google: {}".format(result['link']))
         m = re.search(regexstring, result['link'])
-        if (m):
+        if m:
             url = result['link']
             url = url.replace('%25', '%')
             return url
@@ -89,7 +89,7 @@ def google_url(searchterm, regexstring):
     return
 
 
-def load_html_from_URL(url, readlength="", returnurl=False):
+def load_html_from_url(url, readlength="", returnurl=False):
     url = fixurl(url)
     opener = urllib.request.build_opener()
 
@@ -116,8 +116,8 @@ def shorten_url(url):
     key = bot_object.botconfig["APIkeys"]["shorturlkey"]
     values = json.dumps({'longUrl': url})
     headers = {'Content-Type': 'application/json'}
-    requestUrl = "https://www.googleapis.com/urlshortener/v1/url?key={}".format(key)
-    req = urllib.request.Request(requestUrl, values.encode(), headers)
+    request_url = "https://www.googleapis.com/urlshortener/v1/url?key={}".format(key)
+    req = urllib.request.Request(request_url, values.encode(), headers)
     response = urllib.request.urlopen(req)
     results = json.loads(response.read().decode('utf-8'))
     shorturl = results['id']

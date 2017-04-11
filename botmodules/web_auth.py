@@ -112,8 +112,9 @@ class AuthController(object):
     
     def on_logout(self, username):
         """Called on logout"""
-    
-    def get_loginform(self, username, msg="Enter login information", from_page="/"):
+
+    @staticmethod
+    def get_loginform(username, msg="Enter login information", from_page="/"):
         return """<html><body>
             <form method="post" action="/auth/login">
             <input type="hidden" name="from_page" value="%(from_page)s" />
@@ -125,14 +126,12 @@ class AuthController(object):
     
     @cherrypy.expose
     def login(self, username=None, password=None, token=None, admin=None, from_page="/"):
-        if admin and token:
-            if admin in self.bot.botadmins:
-                if token == self.bot.botadmin_webui_tokens[admin]:
-                    self.bot.logger.info("Accepted admin UI login from admin ({})".format(admin))
-                    self.bot.botadmin_webui_tokens[admin] = None #invalidate token as soon as it's used once
-                    cherrypy.session[SESSION_KEY] = cherrypy.request.login = "admin"
-                    self.on_login(username)
-                    raise cherrypy.HTTPRedirect(from_page or "/")
+        if admin in self.bot.botadmins and token == self.bot.botadmin_webui_tokens[admin]:
+            self.bot.logger.info("Accepted admin UI login from admin ({})".format(admin))
+            self.bot.botadmin_webui_tokens[admin] = None #invalidate token as soon as it's used once
+            cherrypy.session[SESSION_KEY] = cherrypy.request.login = "admin"
+            self.on_login(username)
+            raise cherrypy.HTTPRedirect(from_page or "/")
 
         if username is None or password is None:
             return self.get_loginform("", from_page=from_page)

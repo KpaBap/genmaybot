@@ -11,23 +11,23 @@ def get_fml(self, e):
     start = fmlxml.find("<agree>") + 7
     end = fmlxml.find("</agree>")
 
-    iAgree = int(fmlxml[start:end])
+    i_agree = int(fmlxml[start:end])
 
     start = fmlxml.find("<deserved>") + 10
     end = fmlxml.find("</deserved>")
 
-    iDeserved = int(fmlxml[start:end])
+    i_deserved = int(fmlxml[start:end])
 
     # Use percentages for more meaningful schadenfreude stats
-    total = iAgree+iDeserved
-    iAgree = round(iAgree/(total)*100,1)
-    iDeserved = round(iDeserved/(total)*100,1)
+    total = i_agree+i_deserved
+    i_agree = round(i_agree/(total)*100,1)
+    i_deserved = round(i_deserved/(total)*100,1)
 
-    sAgree = " [FYL: " + str(iAgree) + "%"
-    sDeserved = " Deserved it: " + str(iDeserved) + "%]"
+    s_agree = " [FYL: " + str(i_agree) + "%"
+    s_deserved = " Deserved it: " + str(i_deserved) + "%]"
 
     # Put together the whole line for output
-    fml = fml + sAgree + sDeserved
+    fml = fml + s_agree + s_deserved
 
     fml = fml.replace('&quot;', '"')
     fml = fml.replace('&amp;quot;', '"')

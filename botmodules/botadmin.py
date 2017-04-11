@@ -296,15 +296,15 @@ def test_all_commands(line, nick, self, irc_context):
 
 
     for command in self.bangcommands:
-        event = TestBot.botEvent(nick, nick, "testuser@testhost.test", input)
+        event = TestBot.Botevent(nick, nick, "testuser@testhost.test", input)
         event.botnick = irc_context.get_nickname()
         try:
             event.output = "Command: {} Input: {} Output: {}\n".format(command, input, self.bangcommands[command](self, event).output)
-            self.botSay(event)
+            self.bot_say(event)
         except:
             self.logger.exception("Command: ({}) Input: ({}) Exception:".format(command, input))
             event.output = "Command: {} Input: {} Exception: {}".format(command, input, sys.exc_info())
-            self.botSay(event)
+            self.bot_say(event)
 
 
 

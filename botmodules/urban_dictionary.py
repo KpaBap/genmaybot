@@ -24,7 +24,7 @@ def get_urbandictionary(self, e):
     if searchterm == "":
         url = "http://www.urbandictionary.com/random.php"
 
-    page, url = self.tools["load_html_from_URL"](url, returnurl=True)
+    page, url = self.tools["load_html_from_url"](url, returnurl=True)
 
     first_definition = ""
 
@@ -39,16 +39,13 @@ def get_urbandictionary(self, e):
         if content.string is not None:
             first_definition += content.string
 
-    #first_definition = first_definition.encode("utf-8", 'ignore')
-#    first_definition = tools.decode_htmlentities(first_definition)
-#    first_word = tools.decode_htmlentities(first_word)
 
     first_definition = first_definition.replace("\n", " ")
     first_definition = first_definition.replace("\r", " ")
     first_definition = first_definition[0:392]
 
-    first_definition = ((first_word + ": " + first_definition) + " [ %s ]" % self.tools['shorten_url'](url))
-    #print first_definition
+    first_definition = first_word + ": " + first_definition + " [ %s ]" % self.tools['shorten_url'](url)
+
     e.output = first_definition
     return e
 
@@ -63,7 +60,7 @@ Shows urbandictionary definition of a word or phrase.
 def get_urbandictionary_wotd(self):
 
     url = "http://www.urbandictionary.com"
-    page = self.tools["load_html_from_URL"](url)
+    page = self.tools["load_html_from_url"](url)
     first_definition = ""
 
     first_word = page.findAll('a', attrs={"class": "word"})[0].string
@@ -73,9 +70,8 @@ def get_urbandictionary_wotd(self):
         if content.string is not None:
             first_definition += content.string
 
-#    first_definition = tools.decode_htmlentities(first_definition)
     first_definition = first_definition.replace("\n", " ")
 
-    wotd = (first_word.decode('utf-8') + ": " + first_definition + " [ %s ]" % self.tools['shorten_url'](url))
+    wotd = first_word.decode('utf-8') + ": " + first_definition + " [ %s ]" % self.tools['shorten_url'](url)
 
     return wotd

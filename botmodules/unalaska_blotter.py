@@ -3,18 +3,17 @@ import time
 
 def get_unalaska_blotter(self, e):
     url = "http://kucb.org/community/blotter/"
-    page = self.tools["load_html_from_URL"](url)
+    page = self.tools["load_html_from_url"](url)
 
     try:
         blots = page.findAll('div', attrs={'id': 'blots'})[0]
-        firstBlot = blots.findAll('div', attrs={'class': 'blot'})[0]
+        first_blot = blots.findAll('div', attrs={'class': 'blot'})[0]
 
-        headline = firstBlot.findAll('span', attrs={'class': 'headline small'})[0].string
-        blotdate = firstBlot.findAll('span', attrs={'class': 'date'})[0].string
-        details = firstBlot.findAll('span', attrs={'class': 'details'})[0].string
+        headline = first_blot.findAll('span', attrs={'class': 'headline small'})[0].string
+        blotdate = first_blot.findAll('span', attrs={'class': 'date'})[0].string
+        details = first_blot.findAll('span', attrs={'class': 'details'})[0].string
     except:
         self.logger.debug("\nSomething went wrong with processing the blotter page in unalaska_blotter.py\n")
-        pass
 
     #Convert date to a bit shorter format
     blotdate = blotdate.replace(".", "")

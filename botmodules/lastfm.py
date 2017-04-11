@@ -2,7 +2,6 @@
 import sqlite3
 import urllib
 import json
-#import time
 
 
 def setlastfmuser(self, e):
@@ -52,7 +51,7 @@ def nowplaying(self, e):
             except:
                 pass
             try:
-                dmin, dsec = divmod((int(trackinfo['duration']) / 1000), 60)
+                dmin, dsec = divmod(int(trackinfo['duration']) / 1000, 60)
                 duration = " [{:.0f}:{:02.0f}]".format(dmin, dsec)
             except:
                 duration = ""
@@ -95,12 +94,6 @@ nowplaying.helptext = """Usage: !np or !np <last.fm username/IRC nick>
 Example: !np
 Shows your currently playing trak on last.fm. To use !np without arguments your username must be set up first with !setlastfm"""
 
-#def np(self, e):
-#    self.irccontext.privmsg("Angstserv", "deprotect {} {}".format(e.source, e.nick))
-#    time.sleep(1)
-#    self.irccontext.mode(e.source, '+b {}'.format(e.hostmask))
-#    self.irccontext.kick(e.source, e.nick, "Congratulations! You found the word of the day, courtesy of !np")
-#np.command = "!np"
 
 def get_trackinfo(apikey, artist, trackname, userid):
     artist = urllib.parse.quote(artist)

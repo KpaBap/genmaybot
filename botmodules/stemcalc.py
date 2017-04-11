@@ -49,7 +49,8 @@ class StemCalc:
                     return_list.append(value)
         return return_list
 
-    def tokenize(self, calc_string):
+    @staticmethod
+    def tokenize(calc_string):
         return re.split('\s', calc_string)
 
     def solve(self):

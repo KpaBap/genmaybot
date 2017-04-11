@@ -1,5 +1,3 @@
-# coding=utf-8
-
 import re
 import hashlib
 import datetime
@@ -138,7 +136,7 @@ def get_title(self, e, url):
     length = 51200
     if url.find("amazon.") != -1:
         length = 100096  # because amazon is coded like shit
-    page = self.tools["load_html_from_URL"](url, length)
+    page = self.tools["load_html_from_url"](url, length)
     title = ""
     meta_title = ""
     
@@ -168,7 +166,7 @@ def last_title(self, e):
     #displays the title of the last link posted (requires sql)
     conn = sqlite3.connect("links.sqlite")
     cursor = conn.cursor()
-    if (cursor.execute("SELECT url FROM links ORDER BY rowid DESC LIMIT 1")):
+    if cursor.execute("SELECT url FROM links ORDER BY rowid DESC LIMIT 1"):
         result = cursor.fetchone()
         url = result[0]
         e.input = url
@@ -185,7 +183,7 @@ def last_link(self, e):
     #displays the title of the last link posted (requires sql)
     conn = sqlite3.connect("links.sqlite")
     cursor = conn.cursor()
-    if (cursor.execute("SELECT url FROM links ORDER BY rowid DESC LIMIT 1")):
+    if cursor.execute("SELECT url FROM links ORDER BY rowid DESC LIMIT 1"):
         result = cursor.fetchone()
         url = result[0]
     conn.close()

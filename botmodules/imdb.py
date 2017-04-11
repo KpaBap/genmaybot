@@ -9,15 +9,13 @@ def get_imdb(self, e, urlposted=False):
     else:
         url = self.tools['google_url']("site:imdb.com inurl:com/title " + searchterm, "imdb.com/title/tt\\d{7}/")
 
-    if not url:
-        pass
-    elif url.find("imdb.com/title/tt") != -1:
+    if url.find("imdb.com/title/tt") != -1:
         movietitle = ""
         rating = ""
         summary = ""
         imdbid = re.search("tt\\d{7}", url)
-        imdburl = ('http://www.imdb.com/title/' + imdbid.group(0) + '/')
-        page = self.tools["load_html_from_URL"](imdburl)
+        imdburl = 'http://www.imdb.com/title/' + imdbid.group(0) + '/'
+        page = self.tools["load_html_from_url"](imdburl)
 
         movietitle = page.html.head.title.string.replace(" - IMDb", "")
         movietitle = movietitle.replace("IMDb - ", "")

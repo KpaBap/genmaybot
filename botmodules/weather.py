@@ -6,7 +6,6 @@ try:
     import botmodules.userlocation as user
 except ImportError:
     user = None
-    pass
 
 
 def set_wwokey(line, nick, self, c):
@@ -47,9 +46,7 @@ def google_geocode(self, address):
         for component in results_json['results'][0]['address_components']:
             if 'locality' in component['types']:
                 city = component['long_name']
-            elif 'point_of_interest' in component['types']:
-                poi = component['long_name']
-            elif 'natural_feature' in component['types']:
+            elif 'point_of_interest' in component['types'] or 'natural_feature' in component['types']:
                 poi = component['long_name']
             elif 'administrative_area_level_1' in component['types']:
                 state = component['short_name']
@@ -59,7 +56,8 @@ def google_geocode(self, address):
                 else:
                     country = False
 
-        if not city: city = poi #if we didn't find a city, maybe there was a POI or natural feature entry, so use that instead
+        if not city:
+            city = poi #if we didn't find a city, maybe there was a POI or natural feature entry, so use that instead
 
         if not country: #Only show the state if in the US
             country == ""
@@ -157,7 +155,8 @@ def get_weather(self, e):
     except:
         location = e.input
     
-    if location and user.get_location(location): location = user.get_location(location) #allow looking up by nickname
+    if location and user.get_location(location):
+        location = user.get_location(location) #allow looking up by nickname
     
     if location == "" and user:
         location = user.get_location(e.nick)
@@ -223,11 +222,11 @@ def forecast_io(self,e, location=""):
     feels_like = current_conditions['apparentTemperature']
 
     min_temp = int(round(results_json['daily']['data'][0]['temperatureMin'],0))
-    #min_temp_time = time.strftime("%I%p",time.gmtime(results_json['daily']['data'][0]['temperatureMinTime'] + (timezone_offset * 3600))).lstrip("0")
+
     min_temp_c = int(round((min_temp - 32)*5/9,0)) 
         
     max_temp = int(round(results_json['daily']['data'][0]['temperatureMax'],0))
-    #max_temp_time = time.strftime("%I%p",time.gmtime(results_json['daily']['data'][0]['temperatureMaxTime'] + (timezone_offset * 3600))).lstrip("0")
+
     max_temp_c = int(round((max_temp - 32)*5/9,0))
         
     if feels_like != temp:

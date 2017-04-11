@@ -39,7 +39,7 @@ def get_wiki(self, e, urlposted=False, forcemediawiki=False):
 
         title = title.decode('utf-8')
 
-        title = (title + " [ %s ]" % url)
+        title = title + " [ %s ]" % url
 
     e.output = title
     return e
@@ -51,7 +51,7 @@ Shows the first couple of sentences of a wikipedia entry for the given search te
 
 
 def read_wiki_page(self, url):
-    page, url = self.tools["load_html_from_URL"](url, returnurl=True)
+    page, url = self.tools["load_html_from_url"](url, returnurl=True)
 
     tables = page.findAll('table')
     for table in tables:
@@ -63,9 +63,7 @@ def read_wiki_page(self, url):
     else:
         page = page.findAll('p')
 
-        if str(page[0])[0:9] == '<p><span ':
-            page = str(page[1].extract())
-        elif self.tools['remove_html_tags'](str(page[0])).strip() == '':
+        if str(page[0])[0:9] == '<p><span ' or self.tools['remove_html_tags'](str(page[0])).strip() == '':
             page = str(page[1].extract())
         else:
             page = str(page[0].extract())
@@ -82,25 +80,21 @@ def read_wiki_page(self, url):
 
 
 def get_wiki_file_description(self, url):
-    page = self.tools["load_html_from_URL"](url)
+    page = self.tools["load_html_from_url"](url)
 
     try:
         desc = page.findAll("div", attrs={"class": "description en"})[0].getText(separator=" ")
-        #print "hit 1st case"
     except:
         try:
             desc = page.find("th", attrs={"id": "fileinfotpl_desc"})
             desc = desc.findNextSibling("td").find("p").getText(separator=" ")
-            #print "hit 2nd case"
         except:
             try:
                 desc = page.find("th", attrs={"id": "fileinfotpl_desc"})
                 desc = desc.findNextSibling("td").find("div").getText(separator=" ")
-                #print "hit 3rd case"
             except:
                 try:
                     desc = page.find("div", attrs={"id": "shared-image-desc"}).next.getText(separator=" ")
-                    #print "hit 4th case"
                 except:
                     self.logger.debug("Couldn't find description for file %s" % url)
                     return

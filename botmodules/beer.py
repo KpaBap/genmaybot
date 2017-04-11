@@ -13,48 +13,55 @@ class BeerCals:
 
     def solve(self):
         if self.abv and self.oz:
-            return(self.abv_oz_nofg_to_cals(self.abv, self.oz))
+            return self.abv_oz_nofg_to_cals(self.abv, self.oz)
         elif self.abv and self.ml:
-            return(self.abv_ml_nofg_to_cals(self.abv, self.ml))
+            return self.abv_ml_nofg_to_cals(self.abv, self.ml)
         elif self.abv:
-            return(self.abv_oz_nofg_to_cals(self.abv, self.avg_beer_size_oz))
+            return self.abv_oz_nofg_to_cals(self.abv, self.avg_beer_size_oz)
         else:
             return
-    
-    def oz_to_ml(self,oz):
+
+    @staticmethod
+    def oz_to_ml(oz):
         return float(oz) * 29.574
 
-    def ml_to_oz(self,ml):
+    @staticmethod
+    def ml_to_oz(ml):
         return float(ml) / 29.574
 
-    def plato_to_sg(self, plato): #Plato to specific gravity
+    @staticmethod
+    def plato_to_sg(plato): #Plato to specific gravity
         return plato / (258.6 - (( plato / 258.2) * 227.1)) + 1
 
-    def sg_to_plato(self, sg):
+    @staticmethod
+    def sg_to_plato(sg):
         return -676.67+1286.4*sg-800.47*(sg**2)+190.74*(sg**3)
 
-    def og_and_fg_to_abv(self, og,fg): #original gravity and final gravity to ABV
+    @staticmethod
+    def og_and_fg_to_abv(og,fg): #original gravity and final gravity to ABV
         og = float(og)
         fg = float(fg)
-        #return -17.1225210+146.6266588*og-130.2323766*fg
         return (1.05/0.70)*((og-fg)/fg)*100
 
-
-
-    def og_and_abv_to_fg(self, og, abv): #convert from original gravity and ABV% to final gravity
+    @staticmethod
+    def og_and_abv_to_fg(og, abv): #convert from original gravity and ABV% to final gravity
         return og/((abv/150)+1)
 
-    def abv_and_fg_to_sg(self, abv, fg):
+    @staticmethod
+    def abv_and_fg_to_sg(abv, fg):
         return (1+(abv/150))*fg
 
-    def abv_and_ml_to_cals(self, abv, ml): #calorie count based on alcohol content only
+    @staticmethod
+    def abv_and_ml_to_cals(abv, ml): #calorie count based on alcohol content only
         return float(ml)*(float(abv)/100)*7
 
-    def fg_and_ml_to_cals(self, fg, ml): #calorie count based on residual sugars
+    @staticmethod
+    def fg_and_ml_to_cals(fg, ml): #calorie count based on residual sugars
         return float(ml)*(self.sg_to_plato(fg)/100)*3
 
+
     def og_abv_ml_to_cals(self, og, abv, ml):
-        return int(round((self.abv_and_ml_to_cals(abv, ml) + (self.fg_and_ml_to_cals(self.og_and_abv_to_fg(og, abv), ml))),0))
+        return int(round(self.abv_and_ml_to_cals(abv, ml) + (self.fg_and_ml_to_cals(self.og_and_abv_to_fg(og, abv), ml)),0))
 
     def og_abv_oz_to_cals(self, og, abv, oz):
         return self.og_abv_ml_to_cals(og, abv, self.oz_to_ml(oz))
@@ -67,7 +74,8 @@ class BeerCals:
         fg = self.avg_fg
         return int(round(self.abv_and_ml_to_cals(abv,  self.oz_to_ml(oz)) + self.fg_and_ml_to_cals(fg, self.oz_to_ml(oz)),0))
 
-    def tokenize (self, calc_string):
+    @staticmethod
+    def tokenize (calc_string):
         return re.split('\s', calc_string)
 
 
@@ -77,9 +85,8 @@ def advocate_beer(self, e):
     query = e.input
     #get the name, rating and style of a beer from beeradvocate.com
     url = self.tools['google_url']("site:beeradvocate.com " + query, "/beer/profile/[0-9]*?/[0-9]+")
-    #url = "http://beeradvocate.com/beer/profile/306/1212/"
     try:
-        beerpage = self.tools["load_html_from_URL"](url)
+        beerpage = self.tools["load_html_from_url"](url)
     except:
         self.logger.exception("Function advocate_beer Exception:")
         return

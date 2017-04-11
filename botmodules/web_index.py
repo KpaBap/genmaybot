@@ -19,7 +19,7 @@ class RestrictedArea:
         return """This is the admin only area."""
 
 #generic object to handle the return values from bot functions
-class emptyObject:
+class Emptyobject:
     def __init__(self):
         return
 
@@ -64,9 +64,6 @@ class Root:
         
         botobjects = self.bot.__dict__
         for obj_name in botobjects.keys():
-            
-            #obj_val = str(botobjects[obj_name]).replace("<","&lt;").replace(">","&gt;")
-            
             try:
                 for key in botobjects[obj_name].keys():
                     if key.find("__") != 0:                        
@@ -108,18 +105,19 @@ class Root:
             try: 
                 helptext = self.bot.bangcommands[command].helptext
                 helptext = helptext.replace("\n","<br>")
-            except: helptext=""
+            except:
+                helptext=""
 
             commandlist+= "<p>%s - %s</p>" % (command,helptext)
 
         return commandlist
 
     @cherrypy.expose
-    def doCommand(self, cmd=None):
+    def do_command(self, cmd=None):
         try:        
             cmd = "!"+cmd
             if self.bot.bangcommands[cmd].webExposed:
-                return self.bot.bangcommands[cmd](None, None,True) #Arguments are self, e, webCall
+                return self.bot.bangcommands[cmd](None, None,True) #Arguments are self, e, web_call
         except:
             print (traceback.format_exc())
             return "Invalid command."
@@ -144,7 +142,8 @@ class Root:
     @cherrypy.expose
     @require(name_is("joe"))
     @require(member_of("admin"))   # equivalent: @require(name_is("joe"), member_of("admin"))
-    def only_for_joe_admin(self):
+    @staticmethod
+    def only_for_joe_admin():
         return """Hello Joe Admin - this page is available to you only"""
 
 

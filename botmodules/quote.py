@@ -52,23 +52,19 @@ def command_handler(event, command):
 	#EX: "set http://url1 http://url2 http://url3"
 	words = irc_input.split()
 
-	if(arg_is_present(words)):
+	if arg_is_present(words):
 
 		# ADD <VAL>
 		# "add I'm a hero"
-		if(is_add_arg(words, arg_offset)):
-			if not (set_function_dict[command](words[val_offset:], command)):
+		if is_add_arg(words, arg_offset):
+			if not set_function_dict[command](words[val_offset:], command):
 				add_to_irc_output("\nFailed to add duplicate quote")
 		
-		elif(is_search_arg(words, arg_offset)):
+		elif is_search_arg(words, arg_offset):
 			search_function_dict[command](words[val_offset:], command)
 
 		# ADD
 		# EX: "add"
-		elif(is_arg_without_val(words, arg_offset)):
-			# This eval should be safe, possible values of command are hard coded above.
-			add_to_irc_output(eval(command).helptext)
-
 		# GET <VAL>
 		# EX: "lance_armstrong"
 		else:
@@ -87,13 +83,13 @@ def arg_is_present(words):
 	return len(words)
 
 def is_add_arg(words, offset):
-	return(len(words) >= 2 and words[offset] == quote.addcmd)
+	return len(words) >= 2 and words[offset] == quote.addcmd
 
 def is_search_arg(words, offset):
-	return(len(words) >= 2 and words[offset] == quote.searchcmd)
+	return len(words) >= 2 and words[offset] == quote.searchcmd
 
 def is_arg_without_val(words, offset):
-	return(len(words) == 1 and words[offset] == quote.addcmd)
+	return len(words) == 1 and words[offset] == quote.addcmd
 
 def store_string(words, command):
 	string = ""
@@ -150,7 +146,7 @@ def get_string(command):
 
 	#Found one
 	else:
-		while(string == quote.last_quote):
+		while string == quote.last_quote:
 			bot_object.logger.debug("DEBUG: Same as last quote, fetch another one")
 			string = sql_get_random_value_from_command(command)
 
@@ -168,7 +164,7 @@ def sql_insert_or_update(table, value):
 	#New user
 	query = "SELECT %s from Quotes WHERE Quote=?" % table
 	result = c.execute(query, (value,)).fetchone() 
-	#result = c.execute("SELECT quote FROM Quotes WHERE quote=?", (value,)).fetchone() 
+
 	if result == None:
 		# Not a duplicate quote (hahah) insert it
 		bot_object.logger.debug("DEBUG: New quote, inserting: " + value)

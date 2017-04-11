@@ -64,9 +64,9 @@ def command_handler(event, command):
 	words = irc_input.split()
 	function_dict = command_dict[command]
 
-	if(arg_is_present(words)):
+	if arg_is_present(words):
 		# EX: "set"
-		if(is_arg_without_val(words[arg_offset:], arg_list)):
+		if is_arg_without_val(words[arg_offset:], arg_list):
 			# This eval should be safe, possible values of command are hard coded above.
 			add_to_irc_output(eval(command).helptext)
 			flush_and_reset_irc_output(event)
@@ -78,7 +78,7 @@ def command_handler(event, command):
 			return event
 		except KeyError:
 			nick = words[nick_offset]
-			pass
+
 
 	function_dict['get'](nick, command)
 
@@ -89,8 +89,8 @@ def arg_is_present(words):
 	return len(words)
 
 def is_arg_without_val(args, known_args):
-	if(len(args) == 1):
-		return([arg for arg in args if arg in known_args])
+	if len(args) == 1:
+		return [arg for arg in args if arg in known_args]
 	return
 
 def store_url_for_nick(nick, urls, command):
@@ -207,14 +207,14 @@ def flush_and_reset_irc_output(event):
 
 # Offline debugging
 
-class debug_event:
+class DebugEvent:
 	output = ""
 	input = ""
 	nick = "debug_nick"
 
 def debug():
 	self = ""
-	event = debug_event()
+	event = DebugEvent()
 	__init__(self)
 
 	self.logger.debug("Command:")
