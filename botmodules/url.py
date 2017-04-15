@@ -40,6 +40,7 @@ def url_posted(self, e, titlecall=False):
     result = cursor.execute(query)
     result = cursor.fetchone()
     if result and result[0] != 0:
+        url = result[2]
         repost = "LOL REPOST %s " % (result[0] + 1)
 
         orig = datetime.datetime.strptime(result[1], "%Y-%m-%d %H:%M:%S")
@@ -67,7 +68,6 @@ def url_posted(self, e, titlecall=False):
                 days = " (posted %s hour%s ago)" % (str(hrs), plural)
 
     title = ""
-    url = result[2]
 
     try:
         wiki = self.bangcommands["!wiki"](self, e, True)
@@ -139,6 +139,7 @@ def get_title(self, e, url):
     page = self.tools["load_html_from_url"](url, length)
     title = ""
     meta_title = ""
+
     
     if page and page.find('meta', attrs={'name': "generator", 'content': re.compile("MediaWiki", re.I)}):
         try:
@@ -150,12 +151,12 @@ def get_title(self, e, url):
         try:
             title = "Title: " + page.find('title').string
         except:
-            title = ""
+            pass
 
         try:
             title = "Title: " + page.find('meta', attrs={'property': "og:title"}).get("content")
         except:
-            title = ""
+            pass
         
         
         return title
@@ -192,3 +193,24 @@ def last_link(self, e):
 
 last_link.command = "!lastlink"
 last_link.helptext = "Usage: !lastlink\nShows the last URL that was posted in the channel"
+
+class TestEvent(object):
+    input = "https://snoonet.org/"
+    output = ""
+
+    import tools as tools_module
+    tools = tools_module.__dict__
+
+
+if __name__ == "__main__":
+
+
+    testevent = TestEvent()
+    print("Testing url_parser with URL: {}".format(testevent.input))
+    url_parser(testevent, testevent)
+
+    print("Testing last_link with URL: {}".format(testevent.input))
+    print("last_link returned: {}".format(last_link(testevent, testevent).output))
+    print("last_title returned: {}".format(last_title(testevent, testevent).output))
+
+
