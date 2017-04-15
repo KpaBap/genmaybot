@@ -198,14 +198,12 @@ class TestEvent(object):
     input = "https://snoonet.org/"
     output = ""
 
-    import tools as tools_module
-    tools = tools_module.__dict__
-
 
 if __name__ == "__main__":
-
+    import tools as tools_module
 
     testevent = TestEvent()
+    testevent.tools = tools_module.__dict__
     print("Testing url_parser with URL: {}".format(testevent.input))
     url_parser(testevent, testevent)
 
