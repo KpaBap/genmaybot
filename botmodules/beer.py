@@ -55,8 +55,8 @@ class BeerCals:
     def abv_and_ml_to_cals(abv, ml): #calorie count based on alcohol content only
         return float(ml)*(float(abv)/100)*7
 
-    @staticmethod
-    def fg_and_ml_to_cals(fg, ml): #calorie count based on residual sugars
+
+    def fg_and_ml_to_cals(self, fg, ml): #calorie count based on residual sugars
         return float(ml)*(self.sg_to_plato(fg)/100)*3
 
 
