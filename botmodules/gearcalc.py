@@ -166,7 +166,7 @@ class GearCalc:
 
 	def find_rear_teeth(self):
 		for token in self.tokens:
-			m = re.match(r"^(\d{2})-(\d{3})$", token)
+			m = re.match(r"^[\d\?]+x([\d\?]+)$", token)
 			if m and m.group(1) != '?':
 				return int(m.group(1))
 
