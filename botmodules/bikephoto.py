@@ -118,7 +118,7 @@ def store_url_for_nick(nick, urls, command):
 
 	return 1
 
-def store_string_for_nick(self, nick, words, command):
+def store_string_for_nick(nick, words, command):
 	string = ""
 	space = " "
 	
