@@ -114,7 +114,7 @@ def store_url_for_nick(nick, urls, command):
 
 	#We have at least 1 valid URL
 	if not url_string == "":
-		self.store_string_for_nick(nick, url_string, command)
+		store_string_for_nick(nick, url_string, command)
 
 	return 1
 
@@ -132,7 +132,7 @@ def store_string_for_nick(self, nick, words, command):
 
 	add_to_irc_output("\nStoring " + command + " " + string + "for " + nick)
 
-	self.sql_insert_or_update(nick, command, string)
+	sql_insert_or_update(nick, command, string)
 	
 	return 1
 
