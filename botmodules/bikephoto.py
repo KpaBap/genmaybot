@@ -45,7 +45,7 @@ bike.helptext = "Use \"" + bike.command + " [nick]\" for look up, and \"" + bike
 
 # --- End commands
 
-def command_handler(self, event, command):
+def command_handler(event, command):
 	
 	nick_offset = 0
 	arg_offset = 0
