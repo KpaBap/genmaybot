@@ -116,7 +116,7 @@ def store_url_for_nick(nick, urls, command):
 
 	return 1
 
-def store_string_for_nick(nick, words, command):
+def store_string_for_nick(self, nick, words, command):
 	string = ""
 	space = " "
 	
@@ -131,7 +131,7 @@ def store_string_for_nick(nick, words, command):
 
 	add_to_irc_output("\nStoring " + command + " " + string + "for " + nick)
 
-	sql_insert_or_update(nick, command, string)
+	self.sql_insert_or_update(nick, command, string)
 	
 	return 1
 
@@ -148,7 +148,7 @@ def get_string_for_nick(nick, command):
 	
 	return 1
 
-def sql_insert_or_update(nick, command, string):
+def sql_insert_or_update(self, nick, command, string):
 
 	conn = sqlite3.connect('bikephoto.sqlite')
 	c = conn.cursor()
