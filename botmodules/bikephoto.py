@@ -20,7 +20,7 @@ def __init__(self):
 # --- Commands in this module
 
 def bikephoto(self, event):
-	command_handler(event, "bikephoto")
+	self.command_handler(event, "bikephoto")
 	return event
 
 bikephoto.command = "!bikephoto"
@@ -43,7 +43,7 @@ bike.helptext = "Use \"" + bike.command + " [nick]\" for look up, and \"" + bike
 
 # --- End commands
 
-def command_handler(event, command):
+def command_handler(self, event, command):
 	
 	nick_offset = 0
 	arg_offset = 0
@@ -54,8 +54,8 @@ def command_handler(event, command):
 
 	arg_list = ['set']
 	
-	photo_arg_function_dict = {'get':get_string_for_nick, 'set':store_url_for_nick}
-	bike_arg_function_dict = {'get':get_string_for_nick, 'set':store_string_for_nick}
+	photo_arg_function_dict = {'get':get_string_for_nick, 'set':self.store_url_for_nick}
+	bike_arg_function_dict = {'get':get_string_for_nick, 'set':self.store_string_for_nick}
 
 	command_dict = {'bikephoto':photo_arg_function_dict, 'photo':photo_arg_function_dict, 'bike':bike_arg_function_dict}
 
@@ -93,7 +93,7 @@ def is_arg_without_val(args, known_args):
 		return [arg for arg in args if arg in known_args]
 	return
 
-def store_url_for_nick(nick, urls, command):
+def store_url_for_nick(self, nick, urls, command):
 	url_string = ""
 	space = " "
 
@@ -112,7 +112,7 @@ def store_url_for_nick(nick, urls, command):
 
 	#We have at least 1 valid URL
 	if not url_string == "":
-		store_string_for_nick(nick, url_string, command)
+		self.store_string_for_nick(nick, url_string, command)
 
 	return 1
 
