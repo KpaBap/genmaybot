@@ -28,14 +28,14 @@ bikephoto.helptext = "Use \"" + bikephoto.command + " [nick]\" for look up, and 
 
 
 def photo(self, event):
-	command_handler(event, "photo")
+	self.command_handler(event, "photo")
 	return event
 
 photo.command = "!photo"
 photo.helptext = "Use \"" + photo.command + " [nick]\" for look up, and \"" + photo.command + " set <valid URL>\" to create a new one"
 
 def bike(self, event):
-	command_handler(event, "bike")
+	self.command_handler(event, "bike")
 	return event
 
 bike.command = "!bike"
