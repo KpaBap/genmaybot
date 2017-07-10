@@ -2,12 +2,14 @@ import re
 import sqlite3
 import urllib.request
 import urllib.parse
+import logging
 
 #Handles !bike, !bikephoto, and !photo
 
 #TODO - dont split url failure output
 
 g_irc_output = ""
+logger = logging.getLogger(__name__)
 
 def __init__(self):
 	
@@ -20,7 +22,7 @@ def __init__(self):
 # --- Commands in this module
 
 def bikephoto(self, event):
-	self.command_handler(event, "bikephoto")
+	command_handler(event, "bikephoto")
 	return event
 
 bikephoto.command = "!bikephoto"
@@ -28,14 +30,14 @@ bikephoto.helptext = "Use \"" + bikephoto.command + " [nick]\" for look up, and 
 
 
 def photo(self, event):
-	self.command_handler(event, "photo")
+	command_handler(event, "photo")
 	return event
 
 photo.command = "!photo"
 photo.helptext = "Use \"" + photo.command + " [nick]\" for look up, and \"" + photo.command + " set <valid URL>\" to create a new one"
 
 def bike(self, event):
-	self.command_handler(event, "bike")
+	command_handler(event, "bike")
 	return event
 
 bike.command = "!bike"
@@ -54,8 +56,8 @@ def command_handler(self, event, command):
 
 	arg_list = ['set']
 	
-	photo_arg_function_dict = {'get':get_string_for_nick, 'set':self.store_url_for_nick}
-	bike_arg_function_dict = {'get':get_string_for_nick, 'set':self.store_string_for_nick}
+	photo_arg_function_dict = {'get':get_string_for_nick, 'set':store_url_for_nick}
+	bike_arg_function_dict = {'get':get_string_for_nick, 'set': store_string_for_nick}
 
 	command_dict = {'bikephoto':photo_arg_function_dict, 'photo':photo_arg_function_dict, 'bike':bike_arg_function_dict}
 
@@ -93,7 +95,7 @@ def is_arg_without_val(args, known_args):
 		return [arg for arg in args if arg in known_args]
 	return
 
-def store_url_for_nick(self, nick, urls, command):
+def store_url_for_nick(nick, urls, command):
 	url_string = ""
 	space = " "
 
@@ -125,7 +127,6 @@ def store_string_for_nick(self, nick, words, command):
 		for word in words:
 			string += word
 			string += space
-			#self.logger.debug("DEBUG: adding " + word)
 	else:
 		string = words
 
@@ -148,7 +149,7 @@ def get_string_for_nick(nick, command):
 	
 	return 1
 
-def sql_insert_or_update(self, nick, command, string):
+def sql_insert_or_update(nick, command, string):
 
 	conn = sqlite3.connect('bikephoto.sqlite')
 	c = conn.cursor()
@@ -156,26 +157,26 @@ def sql_insert_or_update(self, nick, command, string):
 	#New user
 	result = c.execute("SELECT nick FROM bikePhoto WHERE nick=?", (nick,)).fetchone() 
 	if result == None:
-		self.logger.debug("DEBUG: New nick, inserting " + command + " value: " + string)
+		logger.debug("DEBUG: New nick, inserting " + command + " value: " + string)
 
 		query = "INSERT INTO bikePhoto (nick,%s) VALUES (?,?)" % command
 		result = c.execute(query, (nick, string,))
 		if not result:
-			self.logger.debug("DEBUG: Failed to insert value")
+			logger.debug("DEBUG: Failed to insert value")
 
 	#Existing user
 	else:
-		self.logger.debug("DEBUG: Existing nick, inserting " + command + " value: " + string)
+		logger.debug("DEBUG: Existing nick, inserting " + command + " value: " + string)
 		query = "UPDATE bikePhoto set %s = ? WHERE nick=?" % command
 		result = c.execute(query, (string, nick,))
 		if not result:
-			self.logger.debug("DEBUG: Failed to update value")
+			logger.debug("DEBUG: Failed to update value")
 
 	conn.commit()
 
-	self.logger.debug("Current db state: ")
+	logger.debug("Current db state: ")
 	for row in c.execute("SELECT * FROM bikePhoto"):
-		self.logger.debug(row)
+		logger.debug(row)
 
 	c.close()
 	return 1
@@ -217,7 +218,7 @@ def debug():
 	event = DebugEvent()
 	__init__(self)
 
-	self.logger.debug("Command:")
+	logger.debug("Command:")
 	command = input()
 	print ("Args:")
 	args = input()
@@ -232,6 +233,6 @@ def debug():
 		if word == "!photo":
 			photo(self, event)
 
-	self.logger.debug("All done, output is: " + event.output)
+	logger.debug("All done, output is: " + event.output)
 
 #debug()
