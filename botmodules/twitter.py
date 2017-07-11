@@ -46,6 +46,11 @@ def latest_tweet(self, e):
     return e
 latest_tweet.command = "!lasttweet"
 
+def trump_tweet(self, e):
+  e.input = "realDonaldTrump"
+  return latest_tweet(self, e)
+trump_tweet.command = "!trump"
+
 def breaking_alert(self):
     #returns a new breaking news only if it hasn't returned it before
       try:
