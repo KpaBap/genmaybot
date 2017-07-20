@@ -11,7 +11,8 @@ def url_parser(self, e):
     if url:
         
         if "bap" in e.nick.lower():
-            return "shut your fuck {}".format(e.nick)
+            e.output="shut your fuck {}".format(e.nick)
+            return e
         
         url = url.group(0)
         if url[0:4].lower() != "http":
