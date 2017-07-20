@@ -5,9 +5,14 @@ import sqlite3
 
 
 def url_parser(self, e):
+
     url = re.search(r"(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>])*\))+(?:\(([^\s()<>])*\)|[^\s`!()\[\]{};:'\".,<>?«»“”‘’]))", e.input)
     #http://daringfireball.net/2010/07/improved_regex_for_matching_urls
     if url:
+        
+        if "bap" in e.nick.lower():
+            return "shut your fuck {}".format(e.nick)
+        
         url = url.group(0)
         if url[0:4].lower() != "http":
             url = "http://" + url
