@@ -10,7 +10,7 @@ def url_parser(self, e):
     #http://daringfireball.net/2010/07/improved_regex_for_matching_urls
     if url:
         
-        if "bap" in e.nick.lower():
+        if "duck" in e.nick.lower():
             e.output="shut your fuck {}".format(e.nick)
             return e
         
