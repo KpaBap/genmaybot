@@ -30,6 +30,7 @@ import traceback
 import textwrap
 import logging, logging.handlers
 from jaraco.stream import buffer
+import html
 
 
 # We need this in order to catch whois reply from a registered nick.
@@ -335,7 +336,7 @@ class TestBot(SingleServerIRCBot):
         try:
             if botevent.output:
                 for line in botevent.output.split("\n"):
-                    line = self.tools['decode_htmlentities'](line)
+                    line = html.unescape(line)
                     if botevent.notice:
                         self.irccontext.notice(botevent.source, line)
                     else:
