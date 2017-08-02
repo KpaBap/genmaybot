@@ -1,5 +1,6 @@
 import urllib.parse
 import re
+import html
 
 
 def get_urbandictionary(self, e):
@@ -44,6 +45,9 @@ def get_urbandictionary(self, e):
     first_definition = first_definition.replace("\r", " ")
     first_definition = first_definition[0:392]
 
+    first_word = html.unescape(first_word)
+    first_definition = html.unescape(first_definition)
+    
     first_definition = first_word + ": " + first_definition + " [ %s ]" % self.tools['shorten_url'](url)
 
     e.output = first_definition
@@ -71,7 +75,10 @@ def get_urbandictionary_wotd(self):
             first_definition += content.string
 
     first_definition = first_definition.replace("\n", " ")
-
+    
+    first_word = html.unescape(first_word)
+    first_definition = html.unescape(first_definition)
+    
     wotd = first_word.decode('utf-8') + ": " + first_definition + " [ %s ]" % self.tools['shorten_url'](url)
 
     return wotd
