@@ -22,7 +22,7 @@ def get_presidential_approval(self, event):
         if row['subgroup'] == "All polls":
             break
 
-    event.output = f"President: {row['president']} Approval: {round(float(row['approve_estimate']), 1)}% Disapproval: {round(float(row['disapprove_estimate']), 1)}% Date: {row['modeldate']} [{human_link}"
+    event.output = f"President: {row['president']} Approval: {round(float(row['approve_estimate']), 1)}% Disapproval: {round(float(row['disapprove_estimate']), 1)}% Date: {row['modeldate']} [ {human_link} ]"
     return event
 
 get_presidential_approval.command = "!approval"
