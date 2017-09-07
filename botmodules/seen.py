@@ -32,14 +32,14 @@ def seenlineparser(self, e):
     if "#" in e.source:
         conn = sqlite3.connect('seen.sqlite')
         c = conn.cursor()
-        c.execute("INSERT INTO seen(nick, lastline, channel) VALUES (?,?,?)", (e.nick, e.input, e.source))
+        c.execute("INSERT INTO seen(nick, lastline, channel) VALUES (?,?,?)", (e.nick.lower(), e.input, e.source))
 
         result = c.execute("SELECT nick FROM seen").fetchall()
         for nick in result:
             if nick[0].lower() in e.input.lower() and "!whopaged" not in e.input.lower():
                 #self.logger.debug(nick[0])
                 c.execute("INSERT INTO mentions (mentioned, mentioner, line, channel) "
-                          "VALUES (?,?,?,?)", (nick[0], e.nick, e.input, e.source))
+                          "VALUES (?,?,?,?)", (nick[0], e.nick.lower(), e.input, e.source))
 
         conn.commit()
         c.close()
@@ -59,10 +59,10 @@ def seen(self, e):
         c = conn.cursor()
         if e.input != "*":
             result = c.execute("SELECT nick, lastline, channel, ts FROM "
-                               "seen WHERE lower(nick) = lower(?)", [e.input]).fetchone()
+                               "seen WHERE lower(nick) = lower(?) ORDER BY ts DESC LIMIT 1", [e.input]).fetchone()
         else:
             result = c.execute("SELECT nick, lastline, channel, ts FROM "
-                               "seen WHERE lower(nick) != lower(?)  ORDER BY ts DESC LIMIT 1", [e.nick]).fetchone()
+                               "seen WHERE lower(nick) != lower(?) ORDER BY ts DESC LIMIT 1", [e.nick]).fetchone()
         if result:
             ago = datetime.datetime.utcnow() - datetime.datetime.strptime(result[3], "%Y-%m-%d %H:%M:%S")
             ago = self.tools['prettytimedelta'](ago)
