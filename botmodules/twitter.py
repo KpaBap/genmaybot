@@ -3,6 +3,7 @@ import json
 import urllib, urllib.request, urllib.parse
 import datetime
 import base64
+import re
 
 
 def __init__(self):
@@ -31,6 +32,7 @@ def read_timeline (user):
     updated = datetime.datetime.strptime(tweet[0]['created_at'], "%a %b %d %H:%M:%S +0000 %Y")
     ago = round((datetime.datetime.utcnow() - updated).seconds/60)
     text = tweet[0]['user']['screen_name'] + ": " + tweet[0]['text']
+    text = re.sub(r"\r\n", " ", text)
     return text, updated, ago
 
 def latest_breaking(self, e):
