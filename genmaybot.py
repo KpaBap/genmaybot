@@ -262,6 +262,7 @@ class TestBot(SingleServerIRCBot):
         args = line[len(command) + 1:].strip()
         
         if "ducky" in hostmask.lower() or "ucky" in from_nick.lower():
+            self.doingcommand = False
             return
         
         notice = False
