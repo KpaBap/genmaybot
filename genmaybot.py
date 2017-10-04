@@ -260,7 +260,10 @@ class TestBot(SingleServerIRCBot):
         hostmask = ircevent.source[ircevent.source.find("!") + 1:]
         command = line.split(" ")[0].lower()
         args = line[len(command) + 1:].strip()
-
+        
+        if "ducky" in hostmask.lower() or "ucky" in from_nick.lower():
+            return
+        
         notice = False
 
         try:
