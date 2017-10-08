@@ -1,37 +1,56 @@
-import datetime, urllib.request
 import json
+import urllib.request
+import datetime
+import pytz
 
-def get_nhl_live_games(self, e, web_call=False):
+ET = pytz.timezone("US/Eastern")
+
+def get_nhl_games(self, e):
     if e.input:
         today = e.input
     else:
         today = datetime.date.today().strftime("%Y-%m-%d")
-    url = "http://live.nhle.com/GameData/GCScoreboard/{}.jsonp".format(today)
-    request = urllib.request.urlopen(url)
-    data = request.read().decode()[15:-2]
+        
+    url = "http://statsapi.web.nhl.com/api/v1/schedule?startDate={0}&endDate={0}&expand=schedule.teams,schedule.linescore".format(today)
+    data = urllib.request.urlopen(url).read().decode()
     data = json.loads(data)
-
+    data = data['dates'][0]
+         
     games = []
     for game in data['games']:
-        if not game['bsc']:
-            start = game['bs'].replace(':00 ', ' ')
-            gametxt = "{} - {} ({} ET)".format(game['atcommon'].title(),
-                                               game['htcommon'].title(),
-                                               start)
+ 
+        if game['status']['statusCode'] is "1":
+            # game is scheduled in future
+            starttime = datetime.datetime.strptime(game['gameDate'], "%Y-%m-%dT%H:%M:%SZ")
+            starttime = starttime.replace(tzinfo=pytz.utc).astimezone(tz=ET)
+            starttime = starttime.strftime('%I:%M%p').lstrip('0').replace(':00', '')
+
+            gametxt = "{} @ {} ({} ET)".format(game['teams']['away']['team']['teamName'],
+        	                                   game['teams']['home']['team']['teamName'],
+        	                                   starttime)
         else:
-            gametxt = "{} {} - {} {} ({})".format(game['atcommon'].title(),
-                                                  game['ats'],
-                                                  game['hts'],
-                                                  game['htcommon'].title(),
-                                                  game['bs'])
+            # game finished or currently on
+            away = '{} {}'.format(game['teams']['away']['team']['teamName'],
+            	                  game['linescore']['teams']['away']['goals'])
+            
+            home = '{} {}'.format(game['linescore']['teams']['home']['goals'],
+            	                  game['teams']['home']['team']['teamName'])
+            	                  
+            status = '{} {}'.format(game['linescore']['currentPeriodTimeRemaining'],
+            	                    game['linescore']['currentPeriodOrdinal'])
+            	                    
+            if game['status']['statusCode'] is "7":
+                status = status.replace("3rd", "").strip()
+                
+            gametxt = "{} - {} ({})".format(away, home, status)
+            
         games.append(gametxt)
-
-    if web_call:
-        return " | ".join(games)
-
+        
     e.output = " | ".join(games)
     return e
+        
+get_nhl_games.command = "!nhl"
 
-get_nhl_live_games.command = "!nhl"
-get_nhl_live_games.helptext = "Usage: !nhl Shows today's hockey games and current scores"
-get_nhl_live_games.webExposed = True 
+#get_nhl_games.input = "2017-10-07"
+#get_nhl_games(None,  get_nhl_games)
+#print(get_nhl_games.output)
