@@ -21,8 +21,8 @@ def get_aqi(self, botevent):
     tomorrow = (datetime.datetime.today() + datetime.timedelta(days=+1)).strftime(date_format)
 
 
-    forecast_url = f"http://www.bairnowapi.org/aq/forecast/zipCode/?format=application/json&zipCode={zipcode}&date={today}&distance=25&API_KEY={api_key}"
-    current_url = f"http://www.bairnowapi.org/aq/observation/zipCode/current/?format=application/json&zipCode={zipcode}&distance=25&API_KEY={api_key}"
+    forecast_url = f"http://www.airnowapi.org/aq/forecast/zipCode/?format=application/json&zipCode={zipcode}&date={today}&distance=25&API_KEY={api_key}"
+    current_url = f"http://www.airnowapi.org/aq/observation/zipCode/current/?format=application/json&zipCode={zipcode}&distance=25&API_KEY={api_key}"
 
     current_response = []
     forecast_response = []
