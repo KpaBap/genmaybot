@@ -47,9 +47,10 @@ def google_news(self, e):
     query = urllib.parse.quote(e.input)
     url = ""
     if not query:
-        url = "http://news.google.com/news?ned=us&topic=h&output=rss"
+        url = "https://news.google.com/news/rss/?gl=US&ned=us&hl=en"
+
     else:
-        url = "http://news.google.com/news?q=%s&output=rss" % query
+        url = "https://news.google.com/news/rss/search/section/q/%s/?hl=en&gl=US&ned=us" % query
 
     description, updated, ago = get_newest_rss(self,url)
 
