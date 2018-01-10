@@ -92,6 +92,12 @@ def get_gumby(self, e):
 get_gumby.command ="!gumby"
 get_gumby.helptext = "D'awww!"
 
+def get_grimace(self, e):
+    e.output = "https://i.imgur.com/yyvBaOC.jpg"
+    return e
+get_grimace.command = "!grimace"
+
+
 def faptain(self, e):
     e.output = "FaptainAwesome to the rescue!"
     return e
