@@ -103,3 +103,10 @@ def faptain(self, e):
     return e
 
 faptain.command = "!fap"
+
+def epoop(self, e):
+    e.output = "https://i.imgflip.com/2el2zw.jpg"
+    return e
+
+epoop.command = "!epon"
+
