@@ -130,6 +130,8 @@ def request_json(url):
 
 
 
+def linear_dist(score, scaled_max, scaled_min, raw_max, raw_min):
+    return scaled_max + ((scaled_min-scaled_max)/(raw_min-raw_max))*(score - raw_max)
 
 def untappd_beer_search(self, e):
     clientid = self.botconfig["APIkeys"]["untappd_clientid"]
@@ -139,6 +141,10 @@ def untappd_beer_search(self, e):
     
     
     top_rating = 4.7
+    lowest_rating = 1.1
+    desired_top = 5
+    desired_lowest = 1.5
+    
     beername = e.input
 
     query = urllib.parse.urlencode({"q":beername})
@@ -160,7 +166,7 @@ def untappd_beer_search(self, e):
     
     beer_url = "https://untappd.com/b/%s/%s" % (response['beer_slug'], beerid)
     
-    rating = int(round((float(response['rating_score'])/top_rating)*100, 0))
+    rating =  int(round(linear_dist(float(response['rating_score']), desired_top, desired_lowest, top_rating, lowest_rating)/desired_top*100, 0))
     rating_count = response['rating_count']
 
     if rating >=95:
