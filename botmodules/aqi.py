@@ -6,9 +6,18 @@ from copy import deepcopy
 
 error_msg = "Could not retrieve current air quality data."
 json_error_msg = "JSON schema in response has changed. Please fix me. Key error: {}"
+location_missing_msg = "Use !setlocation <location> to save your location to the bot or use !aqi <zipcode>"
 
 def get_aqi(self, botevent):
-    zipcode = botevent.input
+    zipcode = ""
+    try:
+        zipcode = botevent.input if botevent.input else botevent.user_location
+    except AttributeError:
+        pass
+
+    if not zipcode:
+        botevent.output = location_missing_msg
+        return botevent
 
     try:
         api_key = self.botconfig["APIkeys"]["airnow_apikey"]
@@ -70,8 +79,9 @@ get_aqi.helptext = "Usage: !aqi <zipcode> Retrieves air quality info from airnow
 
 class TestEvent(object):
     def __init__(self):
-        self.input = "95125"
+        self.input = "90210"
         self.output = ""
+        self.user_location = ""
 
 class TestBot(object):
     def __init__(self):
@@ -80,9 +90,13 @@ class TestBot(object):
         self.botconfig = {"APIkeys": {"airnow_apikey": None}}
 
 class AQITests(unittest.TestCase):
+    date_format = "%Y-%m-%d"
+    today = datetime.datetime.today().strftime(date_format)
+    tomorrow = (datetime.datetime.today() + datetime.timedelta(days=+1)).strftime(date_format)
+
     current_response = [{'AQI': 4,
                          'Category': {'Name': 'Good', 'Number': 1},
-                         'DateObserved': '2017-10-12 ',
+                         'DateObserved': '{} '.format(today),
                          'HourObserved': 7,
                          'Latitude': 37.33,
                          'LocalTimeZone': 'PST',
@@ -92,7 +106,7 @@ class AQITests(unittest.TestCase):
                          'StateCode': 'CA'},
                         {'AQI': 70,
                          'Category': {'Name': 'Moderate', 'Number': 2},
-                         'DateObserved': '2017-10-12 ',
+                         'DateObserved': '{} '.format(today),
                          'HourObserved': 7,
                          'Latitude': 37.33,
                          'LocalTimeZone': 'PST',
@@ -104,7 +118,7 @@ class AQITests(unittest.TestCase):
     forecast_response = [{'AQI': 161,
                           'ActionDay': False,
                           'Category': {'Name': 'Unhealthy', 'Number': 4},
-                          'DateForecast': '2017-10-12 ',
+                          'DateForecast': '{} '.format(today),
                           'DateIssue': '2017-10-11 ',
                           'Latitude': 37.33,
                           'Longitude': -121.9,
@@ -114,7 +128,7 @@ class AQITests(unittest.TestCase):
                          {'AQI': 181,
                           'ActionDay': False,
                           'Category': {'Name': 'Unhealthy for Sensitive Groups', 'Number': 3},
-                          'DateForecast': '2017-10-13 ',
+                          'DateForecast': '{} '.format(tomorrow),
                           'DateIssue': '2017-10-11 ',
                           'Latitude': 37.33,
                           'Longitude': -121.9,
@@ -160,7 +174,9 @@ class AQITests(unittest.TestCase):
         self.test_event = TestEvent()
 
     @mock.patch("requests.get", autospec=True)
-    def test_aqi(self, mock_get):
+    def test_aqi_with_input(self, mock_get):
+        self.test_event.input = "95125"
+        self.test_event.user_location = ""
 
         mock_response = mock.MagicMock()
         mock_response.json.side_effect = [self.current_response, self.forecast_response]
@@ -177,6 +193,50 @@ class AQITests(unittest.TestCase):
         self.test_bot.botconfig['APIkeys'].pop("airnow_apikey")
         result = get_aqi(self.test_bot, self.test_event)
         self.assertEqual(result.output, "")
+
+    @mock.patch("requests.get")
+    def test_aqi_no_input_no_saved_location(self, mock_get):
+        self.test_event.input = ""
+        self.test_event.user_location = ""
+
+        result = get_aqi(self.test_bot, self.test_event)
+        self.assertIsNotNone(result)
+        self.assertEqual(result.output, location_missing_msg)
+        mock_get.assert_not_called()
+
+    @mock.patch("requests.get")
+    def test_aqi_no_input_yes_saved_location(self, mock_get):
+        self.test_event.input = ""
+        self.test_event.user_location = "95125"
+
+        mock_response = mock.MagicMock()
+        mock_response.json.side_effect = [self.current_response, self.forecast_response]
+        mock_get.return_value = mock_response
+
+        result = get_aqi(self.test_bot, self.test_event)
+        self.assertIsNotNone(result)
+        self.assertEqual(mock_response.json.call_count, 2)
+        self.assertEqual(result.output, self.desired_output_with_forecast)
+
+    @mock.patch("requests.get")
+    def test_aqi_yes_input_yes_saved_location(self, mock_get):
+        self.test_event.input = "90210"
+        self.test_event.user_location = "95125"
+
+        mock_response = mock.MagicMock()
+        mock_response.json.side_effect = [self.current_response, self.forecast_response]
+        mock_get.return_value = mock_response
+
+        result = get_aqi(self.test_bot, self.test_event)
+        self.assertIsNotNone(result)
+        self.assertEqual(mock_response.json.call_count, 2)
+        self.assertEqual(result.output, self.desired_output_with_forecast)
+
+        #Check that we're using the input and not saved user location
+        for call in mock_get.call_args_list:
+            self.assertIn(self.test_event.input, call[0][0])
+
+
 
     @mock.patch("requests.get", autospec=True)
     def test_aqi_negative(self, mock_get):
@@ -213,7 +273,6 @@ class AQITests(unittest.TestCase):
         for response in broken_response:
             response.pop('AQI')
         mock_response.json.side_effect = [self.current_response, broken_response]
-        #import pdb; pdb.set_trace()
         result = get_aqi(self.test_bot, self.test_event)
         self.assertEqual(result.output, self.desired_output_without_forecast)
 

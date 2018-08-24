@@ -260,7 +260,10 @@ class TestBot(SingleServerIRCBot):
         hostmask = ircevent.source[ircevent.source.find("!") + 1:]
         command = line.split(" ")[0].lower()
         args = line[len(command) + 1:].strip()
-        
+
+        # Init user_location
+        ircevent.user_location = ""
+
         if "ducky" in hostmask.lower() or "ucky" in from_nick.lower():
             self.doingcommand = False
             return
@@ -287,8 +290,12 @@ class TestBot(SingleServerIRCBot):
                 e = self.Botevent(linesource, from_nick, hostmask, args)
                 # store the bot's nick in the event in case we need it.
                 e.botnick = c.get_nickname()
-                self.logger.debug("Got command ({}) from nick ({})".format(command, from_nick))
 
+                try:
+                    e.user_location =  sys.modules['botmodules.userlocation'].get_location(from_nick)
+                except (KeyError, AttributeError):
+                    e.user_location = None
+                self.logger.debug("Got command ({}) from nick ({})".format(command, from_nick))
                 etmp.append(self.bangcommands[command](self, e))
                 self.logger.debug("Command: ({}) Output: ({})".format(command, e.output))
 
