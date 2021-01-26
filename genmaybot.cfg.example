@@ -6,8 +6,6 @@ operpassword=Password
 server=irc.server.net:6667
 channels=#channel1,#channel2
 botadmins=nick1,nick2,etc
-keepalive_timeout=120
-keepalive_nick=OperServ
 
 #This example setting allows people to send 2 commands in quick succession before being ignored by the bot's spam protection
 spam_protect_lines=2

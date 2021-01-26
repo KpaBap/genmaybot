@@ -82,12 +82,6 @@ class TestBot(SingleServerIRCBot):
             self.botadmin_webui_tokens[admin] = None
 
         self.logger.info("Bot admins: {}".format(self.botadmins))
-        if self.botconfig['irc']['keepalive_timeout'] == "":
-            self.botconfig['irc']['keepalive_timeout'] = 120
-
-        if self.botconfig['irc']['keepalive_nick'] == "":
-            self.botconfig['irc']['keepalive_nick'] = "OperServ"
-
 
     def on_nicknameinuse(self, c, e):
         c.nick(c.get_nickname() + "_")
@@ -123,41 +117,8 @@ class TestBot(SingleServerIRCBot):
         self.irccontext = c
         c.who(c.get_nickname())
 
-        self.last_keepalive = time.time()
-
-        self.keepalive(c)
-
     def on_youreoper(self, c, e):
         self.logger.info("I'm an IRCop bitches!")
-
-    def on_ison(self, c, e):
-
-        # strip out extraneous space at the end
-        ison_reply = e.arguments[0][:-1]
-
-        self.logger.debug("Got ISON reply: {}".format(e.arguments[0]))
-
-        if ison_reply == self.botconfig['irc']['keepalive_nick']:
-            self.last_keepalive = time.time()
-            self.alive = True
-
-    def keepalive(self, irc_context):
-        if time.time() - self.last_keepalive > int(self.botconfig['irc']['keepalive_timeout']):
-            if not self.alive:
-                self.logger.info("I think we are dead, reconnecting.")
-                self.jump_server()
-                self.alive = True
-                return
-            self.logger.info("Keepalive reply not received, sending request")
-            irc_context.ison([self.botconfig['irc']['keepalive_nick']])
-            self.alive = False
-        else:
-            # Send ISON command on configured nick
-            irc_context.ison([self.botconfig['irc']['keepalive_nick']])
-
-        self.keepaliveTimer = threading.Timer(
-            3, self.keepalive, [irc_context])
-        self.keepaliveTimer.start()
 
     def on_whoishostline(self, c, e):
         try:
